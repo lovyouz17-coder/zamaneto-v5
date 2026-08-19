@@ -18,7 +18,6 @@ const SESSION_EXPIRES_MS = Number(process.env.SESSION_EXPIRES_DAYS || 30) * 24 *
 const OTP_MAX_ATTEMPTS = 5;
 const OTP_IP_WINDOW_MS = 10 * 60 * 1000;
 const OTP_IP_MAX_REQUESTS = 5;
-const otpIpRequests = new Map();
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -33,25 +32,50 @@ function generateOtp() { return String(crypto.randomInt(1000, 10000)); }
 function createToken() { return crypto.randomBytes(32).toString('hex'); }
 function sha256(value) { return crypto.createHash('sha256').update(value).digest('hex'); }
 
-function consumeOtpIpLimit(ip) {
-  const now = Date.now();
-  const current = otpIpRequests.get(ip) || { startedAt: now, count: 0 };
-  if (now - current.startedAt >= OTP_IP_WINDOW_MS) {
-    otpIpRequests.set(ip, { startedAt: now, count: 1 });
-    return true;
-  }
-  if (current.count >= OTP_IP_MAX_REQUESTS) return false;
-  current.count += 1;
-  otpIpRequests.set(ip, current);
-  return true;
-}
+async function consumeOtpIpLimit(ip) {
+  return withTransaction(async (client) => {
+    const existing = await client.query(
+      `SELECT window_started_at, request_count
+         FROM otp_ip_rate_limits
+        WHERE ip = $1
+        FOR UPDATE`,
+      [ip]
+    );
 
-setInterval(() => {
-  const cutoff = Date.now() - OTP_IP_WINDOW_MS;
-  for (const [ip, entry] of otpIpRequests) {
-    if (entry.startedAt < cutoff) otpIpRequests.delete(ip);
-  }
-}, OTP_IP_WINDOW_MS).unref();
+    const now = new Date();
+    const row = existing.rows[0];
+
+    if (!row) {
+      await client.query(
+        `INSERT INTO otp_ip_rate_limits (ip, window_started_at, request_count)
+         VALUES ($1, $2, 1)`,
+        [ip, now]
+      );
+      return true;
+    }
+
+    const startedAt = new Date(row.window_started_at);
+    if (now.getTime() - startedAt.getTime() >= OTP_IP_WINDOW_MS) {
+      await client.query(
+        `UPDATE otp_ip_rate_limits
+            SET window_started_at = $2, request_count = 1
+          WHERE ip = $1`,
+        [ip, now]
+      );
+      return true;
+    }
+
+    if (Number(row.request_count) >= OTP_IP_MAX_REQUESTS) return false;
+
+    await client.query(
+      `UPDATE otp_ip_rate_limits
+          SET request_count = request_count + 1
+        WHERE ip = $1`,
+      [ip]
+    );
+    return true;
+  });
+}
 
 function defaultUserData() {
   return {
@@ -80,6 +104,7 @@ function ensureUserData(data) {
 async function cleanup() {
   await query('DELETE FROM otp_codes WHERE expires_at <= NOW() OR used = TRUE');
   await query('DELETE FROM sessions WHERE expires_at <= NOW()');
+  await query('DELETE FROM otp_ip_rate_limits WHERE window_started_at <= NOW() - INTERVAL \'10 minutes\'');
 }
 
 async function auth(req, res, next) {
@@ -129,7 +154,7 @@ app.post('/api/auth/request-otp', async (req, res, next) => {
     const phone = normalizePhone(req.body?.phone);
     if (!isIranPhone(phone)) return res.status(400).json({ error: 'شماره موبایل باید ۱۱ رقمی و با 09 شروع شود.' });
     const ip = req.ip || req.socket.remoteAddress || 'unknown';
-    if (!consumeOtpIpLimit(ip)) {
+    if (!await consumeOtpIpLimit(ip)) {
       return res.status(429).json({ error: 'تعداد درخواست‌های کد تأیید از این اتصال بیش از حد مجاز است. کمی بعد دوباره تلاش کنید.' });
     }
     await cleanup();
