@@ -15,6 +15,7 @@ const app = express();
 const PORT = Number(process.env.PORT || 3000);
 const OTP_EXPIRES_MS = Number(process.env.OTP_EXPIRES_MINUTES || 5) * 60 * 1000;
 const SESSION_EXPIRES_MS = Number(process.env.SESSION_EXPIRES_DAYS || 30) * 24 * 60 * 60 * 1000;
+const OTP_MAX_ATTEMPTS = 5;
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -137,16 +138,19 @@ app.post('/api/auth/verify-otp', async (req, res, next) => {
 
     const result = await withTransaction(async (client) => {
       const otpResult = await client.query(
-        `SELECT id FROM otp_codes
+        `SELECT id, code_hash, attempts FROM otp_codes
           WHERE phone = $1 AND used = FALSE AND expires_at > NOW()
-          ORDER BY created_at DESC LIMIT 1`, [phone]
+          ORDER BY created_at DESC LIMIT 1 FOR UPDATE`, [phone]
       );
       const otp = otpResult.rows[0];
-      if (!otp) throw Object.assign(new Error('OTP_INVALID'), { status: 401 });
-
-      const codeResult = await client.query('SELECT code_hash FROM otp_codes WHERE id = $1', [otp.id]);
-      if (!codeResult.rows[0] || codeResult.rows[0].code_hash !== sha256(code)) {
+      if (!otp || otp.attempts >= OTP_MAX_ATTEMPTS) {
         throw Object.assign(new Error('OTP_INVALID'), { status: 401 });
+      }
+
+      if (otp.code_hash !== sha256(code)) {
+        const attempts = otp.attempts + 1;
+        await client.query('UPDATE otp_codes SET attempts = $1 WHERE id = $2', [attempts, otp.id]);
+        throw Object.assign(new Error(attempts >= OTP_MAX_ATTEMPTS ? 'OTP_LOCKED' : 'OTP_INVALID'), { status: 401 });
       }
 
       await client.query('UPDATE otp_codes SET used = TRUE, used_at = NOW() WHERE id = $1', [otp.id]);
@@ -171,7 +175,10 @@ app.post('/api/auth/verify-otp', async (req, res, next) => {
 
     res.json({ ok: true, token: result.rawToken, user: publicUser(result.user) });
   } catch (e) {
-    if (e?.status === 401) return res.status(401).json({ error: 'کد تأیید اشتباه یا منقضی شده است.' });
+    if (e?.status === 401) {
+      if (e?.message === 'OTP_LOCKED') return res.status(429).json({ error: 'تعداد تلاش‌های کد تأیید بیش از حد مجاز است. کد جدید درخواست کنید.' });
+      return res.status(401).json({ error: 'کد تأیید اشتباه یا منقضی شده است.' });
+    }
     next(e);
   }
 });
