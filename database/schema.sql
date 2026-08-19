@@ -27,6 +27,13 @@ ALTER TABLE otp_codes ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT
 CREATE INDEX IF NOT EXISTS idx_otp_phone_created ON otp_codes(phone, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_otp_expires ON otp_codes(expires_at);
 
+CREATE TABLE IF NOT EXISTS otp_ip_rate_limits (
+  ip TEXT PRIMARY KEY,
+  window_started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  request_count INTEGER NOT NULL DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_otp_ip_rate_limits_window ON otp_ip_rate_limits(window_started_at);
+
 CREATE TABLE IF NOT EXISTS sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
