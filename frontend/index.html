@@ -1,0 +1,1592 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>زمانتو — مدیریت هوشمند زمان</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+@property --progress{syntax:'<percentage>';inherits:false;initial-value:0%}
+:root{--bg:#070912;--panel:#0d1120;--panel2:#11162a;--text:#f8f8fc;--muted:#9198ac;--line:rgba(255,255,255,.075);--purple:#8658ff;--purple2:#b36cff;--blue:#3ea6ff;--green:#30d17b;--orange:#ffad35;--red:#ff6587;--cyan:#41d9d1;--shadow:0 24px 70px rgba(0,0,0,.32);--radius:24px}
+.light{--bg:#f5f7fb;--panel:#fff;--panel2:#f0f3f9;--text:#171a25;--muted:#71788a;--line:rgba(20,24,35,.08);--shadow:0 18px 40px rgba(40,50,80,.10)}
+*{box-sizing:border-box}
+html,body{margin:0;background:radial-gradient(circle at 15% 0,rgba(134,88,255,.13),transparent 28%),var(--bg);color:var(--text);font-family:Vazirmatn,Arial,sans-serif}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh;display:flex}
+.app.locked{visibility:hidden}
+.sidebar{width:250px;background:linear-gradient(180deg,rgba(255,255,255,.025),transparent),var(--panel);border-left:1px solid var(--line);padding:20px 16px;position:fixed;right:0;top:0;bottom:0;z-index:20;overflow-y:auto}
+.brand{display:flex;gap:10px;align-items:center;padding:8px 8px 24px}
+.logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(135deg,var(--purple2),var(--purple));font-size:20px;font-weight:800;box-shadow:0 12px 30px rgba(134,88,255,.3);color:#fff}
+.brand h1{margin:0;font-size:18px}
+.brand small{color:var(--muted);font-size:10px}
+nav{display:grid;gap:7px}
+nav button{border:0;background:none;color:var(--muted);padding:12px 13px;border-radius:15px;text-align:right;display:flex;gap:11px;align-items:center;font-weight:600}
+nav button.active,nav button:hover{background:var(--panel2);color:var(--text)}
+nav i{width:7px;height:7px;border-radius:50%;background:transparent;display:block}
+nav button.active i{background:var(--purple2)}
+.sidebarBottom{margin-top:24px}
+.upgrade{padding:16px;border-radius:18px;background:linear-gradient(145deg,rgba(134,88,255,.18),rgba(65,217,209,.05));border:1px solid rgba(134,88,255,.24)}
+.upgrade strong{display:block;margin-bottom:5px}
+.upgrade p{margin:0 0 10px;color:var(--muted);font-size:11px;line-height:1.8}
+.cta{border:0;padding:10px 13px;border-radius:12px;background:linear-gradient(90deg,var(--purple),#6c54ff);color:#fff;font-weight:800}
+.main{margin-right:250px;width:calc(100% - 250px);padding:24px 28px 44px}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.hello small{color:var(--muted);font-size:11px}
+.hello h2{margin:3px 0 0;font-size:28px}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.icon{width:42px;height:42px;border:1px solid var(--line);border-radius:13px;background:var(--panel);color:var(--text)}
+.hero{border:1px solid rgba(134,88,255,.22);border-radius:28px;padding:20px;display:grid;grid-template-columns:1fr 260px;gap:24px;background:radial-gradient(circle at 85% 15%,rgba(179,108,255,.22),transparent 35%),linear-gradient(145deg,rgba(134,88,255,.15),rgba(255,255,255,.02)),var(--panel);box-shadow:var(--shadow);overflow:hidden}
+.heroMain{display:flex;align-items:center;gap:20px}
+.progressRing{--progress:0%;width:145px;height:145px;border-radius:50%;background:conic-gradient(var(--purple2) 0 var(--progress),rgba(255,255,255,.07) var(--progress) 100%);display:grid;place-items:center;position:relative;flex:0 0 auto}
+.progressRing:after{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--panel)}
+.progressText{position:relative;z-index:2;text-align:center}
+.progressText b{display:block;font-size:33px}
+.progressText span{font-size:10px;color:var(--muted)}
+.heroCopy h3{font-size:21px;margin:0 0 5px}
+.heroCopy p{color:var(--muted);font-size:12px;line-height:2;margin:0 0 12px}
+.heroCopy .cta{padding:11px 17px}
+.miniStats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:12px}
+.mini{border:1px solid var(--line);background:rgba(255,255,255,.025);border-radius:14px;padding:10px;text-align:center}
+.mini b{display:block;font-size:19px}
+.mini span{font-size:9px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1.2fr .8fr;gap:16px;margin-top:16px}
+.card{background:linear-gradient(180deg,rgba(255,255,255,.018),transparent),var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.cardHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:13px;gap:10px;flex-wrap:wrap}
+.cardHead h3{margin:0;font-size:15px}
+.muted{color:var(--muted);font-size:10px}
+.timeline{display:grid;gap:7px}
+.item{display:grid;grid-template-columns:55px 1fr;gap:9px;align-items:center}
+.time{font-size:10px;color:var(--muted);text-align:left}
+.task{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border-radius:14px;border:1px solid var(--line);background:var(--panel2)}
+.taskMain{display:flex;gap:10px;align-items:center;flex:1;min-width:0}
+.taskIcon{width:33px;height:33px;border-radius:10px;display:grid;place-items:center;background:rgba(134,88,255,.16);font-size:14px;flex:0 0 auto}
+.taskMain b{font-size:11px;transition:.2s ease;display:block}
+.taskMain b.completed{text-decoration:line-through;opacity:.55}
+.check{width:22px;height:22px;border-radius:8px;border:1.5px solid rgba(255,255,255,.34);background:transparent;color:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);transition:.18s ease;display:grid;place-items:center;font-size:12px;padding:0}
+.light .check{border-color:rgba(72,78,96,.42);background:rgba(255,255,255,.42)}
+.check:hover{border-color:var(--purple2);transform:scale(1.04)}
+.check.done{background:var(--green);border-color:var(--green);color:#fff;box-shadow:none}
+.focusBox{min-height:326px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px}
+.timer{width:185px;height:185px;border-radius:50%;background:conic-gradient(var(--purple2) 0 var(--tprog,0%),rgba(255,255,255,.06) var(--tprog,0%));display:grid;place-items:center;position:relative;transition:background .3s}
+.timer:after{content:"";position:absolute;inset:14px;border-radius:50%;background:var(--panel)}
+.timerInner{position:relative;z-index:2;text-align:center}
+.timerInner b{font-size:38px;display:block}
+.timerInner span{font-size:9px;color:var(--muted)}
+.focusControls{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap;justify-content:center}
+.ghost{background:var(--panel2);color:var(--text);border:0;padding:10px 14px;border-radius:12px}
+.focusNote{margin-top:8px;color:var(--muted);font-size:10px;text-align:center}
+.focusModePill{display:inline-block;padding:4px 10px;border-radius:9px;font-size:9px;background:rgba(134,88,255,.15);color:var(--purple2);margin-bottom:8px}
+.focusModePill.break{background:rgba(65,217,209,.15);color:var(--cyan)}
+.bottomGrid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}
+.habits{display:grid;gap:9px}
+.habit{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:14px;background:var(--panel2);border:1px solid var(--line);gap:8px}
+.habitInfo{display:flex;gap:9px;align-items:center;flex:1;min-width:0}
+.habitIcon{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;background:rgba(65,217,209,.12);flex:0 0 auto;font-size:14px}
+.habit b{font-size:11px;display:block}
+.habit small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.habitActions{display:flex;gap:5px;align-items:center}
+.habitCheck{width:32px;height:32px;border-radius:10px;border:1.5px solid rgba(255,255,255,.2);background:transparent;color:var(--text);font-size:14px;display:grid;place-items:center;padding:0;transition:.2s}
+.light .habitCheck{border-color:rgba(72,78,96,.35)}
+.habitCheck.done{background:var(--green);border-color:var(--green);color:#fff}
+.habitStreak{padding:4px 8px;border-radius:8px;background:rgba(255,173,53,.12);color:var(--orange);font-size:9px;font-weight:700}
+.chart{height:190px;display:flex;gap:9px;align-items:flex-end}
+.bar{flex:1;min-height:10px;border-radius:9px 9px 3px 3px;background:linear-gradient(180deg,var(--purple2),rgba(134,88,255,.12));transition:height .5s ease;position:relative}
+.labels{display:flex;justify-content:space-between;color:var(--muted);font-size:9px;margin-top:7px}
+.chartSummary{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.summary{padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);font-size:10px;color:var(--muted)}
+.summary b{display:block;font-size:16px;color:var(--text)}
+.ai{margin-top:16px;border-radius:23px;border:1px solid rgba(134,88,255,.2);padding:16px 18px;background:linear-gradient(100deg,rgba(134,88,255,.16),rgba(65,217,209,.05));display:flex;gap:15px;align-items:center}
+.bot{width:58px;height:58px;border-radius:18px;background:linear-gradient(145deg,#9a69ff,#5844e3);display:grid;place-items:center;font-size:28px;flex:0 0 auto;color:#fff}
+.ai h3{margin:0 0 5px;font-size:13px}
+.ai p{margin:0;color:var(--muted);font-size:10px;line-height:1.9}
+.ai .arrow{margin-right:auto;width:37px;height:37px;border-radius:12px;background:var(--panel2);color:var(--text);display:grid;place-items:center;border:0}
+.page{display:none}.page.active{display:block}
+.pricing{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.plan{padding:18px;border:1px solid var(--line);border-radius:20px;background:var(--panel2);position:relative}
+.plan.featured{outline:2px solid var(--purple)}
+.ribbon{position:absolute;left:14px;top:14px;background:var(--purple);color:#fff;padding:5px 8px;border-radius:8px;font-size:8px}
+.price{font-size:27px;font-weight:800;margin:10px 0}
+.plan ul{padding-right:18px;color:var(--muted);font-size:10px;line-height:2.2}
+.plan .cta,.plan .ghost{width:100%}
+.modalBack{display:none;position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.58);backdrop-filter:blur(9px);align-items:center;justify-content:center;padding:18px}
+.modalBack.show{display:flex}
+.modal{width:min(470px,100%);background:var(--panel);border:1px solid var(--line);border-radius:22px;padding:18px;box-shadow:0 35px 90px rgba(0,0,0,.45);max-height:90vh;overflow-y:auto}
+.modalWide{width:min(600px,100%)}
+.modal h3{margin-top:0}
+.field{display:grid;gap:6px;margin:10px 0}
+.field label{font-size:10px;color:var(--muted)}
+.field input,.field select,.profileInput{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--text);border-radius:12px;padding:10px;outline:none}
+.formGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.modalBtns{display:flex;gap:8px;margin-top:14px}
+.mobileNav{display:none}
+.taskActions{display:flex;gap:5px;opacity:.65;transition:.15s ease;align-items:center}
+.task:hover .taskActions{opacity:1}
+.taskAction{width:28px;height:28px;border:0;border-radius:9px;background:var(--panel);color:var(--muted);font-size:12px;display:grid;place-items:center;padding:0}
+.taskAction:hover{background:var(--panel2);color:var(--text)}
+.taskMeta{display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap}
+.taskMeta span{display:inline-block!important;margin:0!important;color:var(--muted);font-size:9px}
+.priority{padding:3px 7px;border-radius:8px;font-size:8px!important}
+.priority.high{background:rgba(255,101,135,.12);color:#ff8ca5}
+.priority.medium{background:rgba(255,173,53,.12);color:#ffc36b}
+.priority.low{background:rgba(65,217,209,.12);color:#6be4dc}
+.category{padding:3px 7px;border-radius:8px;font-size:8px!important;background:var(--panel);color:var(--muted)}
+.taskFilters{display:flex;gap:6px;flex-wrap:wrap}
+.filterBtn{border:0;background:var(--panel2);color:var(--muted);padding:6px 9px;border-radius:9px;font-size:9px}
+.filterBtn.active{background:rgba(134,88,255,.16);color:var(--text)}
+.emptyTasks{padding:30px 12px;text-align:center;color:var(--muted);font-size:11px}
+.emptyTasks b{display:block;color:var(--text);font-size:14px;margin-bottom:6px}
+.authGate{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 15% 15%,rgba(179,108,255,.20),transparent 28%),radial-gradient(circle at 85% 80%,rgba(65,217,209,.10),transparent 28%),var(--bg);display:none;align-items:center;justify-content:center;padding:20px}
+.authGate.show{display:flex}
+.authShell{width:min(1080px,100%);min-height:min(700px,calc(100vh - 40px));display:grid;grid-template-columns:1.05fr .95fr;border:1px solid var(--line);border-radius:32px;overflow:hidden;background:linear-gradient(145deg,rgba(255,255,255,.025),transparent),var(--panel);box-shadow:0 35px 100px rgba(0,0,0,.38)}
+.authVisual{padding:46px;display:flex;flex-direction:column;justify-content:space-between;background:radial-gradient(circle at 40% 20%,rgba(134,88,255,.22),transparent 35%),linear-gradient(145deg,rgba(134,88,255,.13),rgba(65,217,209,.04))}
+.authLogo{display:flex;align-items:center;gap:10px}
+.authLogo .logo{width:48px;height:48px}
+.authLogo h2{margin:0;font-size:20px}
+.authLogo small{display:block;color:var(--muted);font-size:10px;margin-top:3px}
+.authVisual h3{font-size:38px;line-height:1.35;margin:0 0 12px;max-width:560px}
+.authVisual p{color:var(--muted);line-height:2;font-size:12px;max-width:520px}
+.authFeatureGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:22px}
+.authFeature{padding:13px;border:1px solid var(--line);border-radius:16px;background:rgba(255,255,255,.025)}
+.authFeature b{font-size:11px}
+.authFeature span{display:block;color:var(--muted);font-size:9px;margin-top:4px}
+.authForm{padding:42px;display:flex;align-items:center;justify-content:center}
+.authBox{width:min(410px,100%)}
+.authBox h1{font-size:27px;margin:0 0 7px}
+.authBox .lead{color:var(--muted);font-size:11px;line-height:1.9;margin:0 0 20px}
+.authField{display:grid;gap:7px;margin:10px 0}
+.authField label{font-size:10px;color:var(--muted)}
+.authField input{width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:13px;padding:12px;outline:none}
+.authField input:focus{border-color:rgba(179,108,255,.55)}
+.authPrimary{width:100%;border:0;padding:12px 14px;border-radius:13px;color:#fff;font-weight:800;background:linear-gradient(90deg,var(--purple),#6c54ff);box-shadow:0 13px 28px rgba(134,88,255,.22);margin-top:8px}
+.authHint{font-size:9px;color:var(--muted);margin-top:11px;line-height:1.8}
+.authStatus{font-size:10px;margin-top:8px;color:var(--red);min-height:15px}
+.otpBoxes{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0;direction:ltr}
+.otpDigit{width:100%;aspect-ratio:1;background:var(--panel2);border:1.5px solid var(--line);color:var(--text);border-radius:14px;text-align:center;font-size:24px;font-weight:800;outline:none;transition:.2s}
+.otpDigit:focus{border-color:var(--purple2);box-shadow:0 0 0 3px rgba(179,108,255,.15)}
+.otpDigit.filled{border-color:var(--purple);background:rgba(134,88,255,.08)}
+.otpFooter{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px;flex-wrap:wrap}
+.otpLink{background:none;border:0;color:var(--muted);font-size:10px;padding:6px 4px}
+.otpLink:not(:disabled):hover{color:var(--purple2)}
+.otpLink:disabled{opacity:.5;cursor:not-allowed}
+#resendTimer{color:var(--purple2);font-weight:700;margin:0 2px}
+#phoneInput{direction:ltr;text-align:center;font-size:16px;letter-spacing:2px}
+#phoneInput::placeholder{letter-spacing:normal}
+.rewardBanner{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:18px;margin-bottom:16px;border:1px solid rgba(179,108,255,.3);background:linear-gradient(100deg,rgba(134,88,255,.18),rgba(65,217,209,.08));position:relative;overflow:hidden;animation:slideIn .5s cubic-bezier(.22,.8,.24,1)}
+.rewardBanner::before{content:"";position:absolute;top:0;left:-30%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.1),transparent);animation:shimmer 3s infinite;pointer-events:none}
+@keyframes shimmer{0%{left:-30%}100%{left:130%}}
+@keyframes slideIn{from{opacity:0;transform:translateY(-10px)}to{opacity:1;transform:translateY(0)}}
+.rewardBannerActive{background:linear-gradient(100deg,rgba(48,209,123,.15),rgba(179,108,255,.10));border-color:rgba(48,209,123,.4)}
+.rewardIcon{width:48px;height:48px;border-radius:14px;background:rgba(179,108,255,.2);display:grid;place-items:center;font-size:24px;flex:0 0 auto}
+.rewardBannerActive .rewardIcon{background:rgba(48,209,123,.2)}
+.rewardBody{flex:1;min-width:0}
+.rewardBody b{display:block;font-size:13px;margin-bottom:3px}
+.rewardBody span{display:block;color:var(--muted);font-size:11px}
+.rewardActions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.rewardActions .cta{padding:8px 12px;font-size:11px}
+.rewardClose{width:28px;height:28px;border-radius:9px;background:transparent;border:0;color:var(--muted);font-size:16px}
+.rewardClose:hover{background:var(--panel2);color:var(--text)}
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--panel);border:1px solid var(--line);padding:12px 20px;border-radius:14px;box-shadow:0 20px 50px rgba(0,0,0,.4);z-index:200;font-size:11px;opacity:0;transition:.3s ease;pointer-events:none;max-width:calc(100% - 40px);text-align:center}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.success{border-color:var(--green);color:var(--green)}
+.toast.error{border-color:var(--red);color:var(--red)}
+.calWeek{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:8px}
+.calWeekDay{text-align:center;padding:8px 4px;font-size:11px;color:var(--muted);font-weight:600}
+.calWeekDay.friday{color:var(--red)}
+.calGrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.calDay{aspect-ratio:1;background:var(--panel2);border:1.5px solid transparent;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;padding:6px 4px;position:relative;transition:.2s;color:var(--text);font:inherit;overflow:hidden}
+.calDay:hover:not(:disabled):not(.empty){border-color:var(--purple2);transform:translateY(-2px);box-shadow:0 8px 20px rgba(134,88,255,.15)}
+.calDay.empty{background:transparent;cursor:default;pointer-events:none;opacity:.15}
+.calDay.friday{background:rgba(255,101,135,.05)}
+.calDay.today{background:linear-gradient(145deg,rgba(134,88,255,.3),rgba(134,88,255,.15));border-color:var(--purple2);font-weight:800}
+.calDay.selected{background:linear-gradient(145deg,var(--purple2),var(--purple));color:#fff;border-color:transparent;box-shadow:0 10px 30px rgba(134,88,255,.35)}
+.calDay.selected .calDayNum,.calDay.selected .calDayHoliday{color:#fff}
+.calDayNum{font-size:15px;font-weight:700;line-height:1}
+.calDayDots{display:flex;gap:3px;height:6px;align-items:center;min-height:6px;justify-content:center}
+.calDayDot{width:5px;height:5px;border-radius:50%;background:var(--purple2)}
+.calDay.selected .calDayDot{background:rgba(255,255,255,.85)}
+.calDay.allDone .calDayDot{background:var(--green)}
+.calDayHoliday{font-size:8px;color:var(--red);text-align:center;line-height:1;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px}
+.calDay.friday .calDayNum{color:var(--red)}
+.calDay.friday.selected .calDayNum{color:#fff}
+.jDateBtn{display:flex;justify-content:space-between;align-items:center;font:inherit;text-align:right;cursor:pointer}
+.jDateBtn:hover{border-color:var(--purple2)}
+.jdpHead{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.jdpHead b{font-size:15px}
+@media(max-width:1100px){.hero{grid-template-columns:1fr}.grid2{grid-template-columns:1fr}.pricing{grid-template-columns:1fr 1fr}}
+@media(max-width:780px){.sidebar{display:none}.main{margin:0;width:100%;padding:16px 13px 84px}.hello h2{font-size:23px}.actions .cta{display:none}.heroMain{align-items:flex-start;flex-direction:column}.progressRing{width:125px;height:125px}.hero{padding:17px}.miniStats{width:100%}.grid2,.bottomGrid{grid-template-columns:1fr}.card{padding:15px}.timeline .item{grid-template-columns:46px 1fr}.task{padding:10px}.mobileNav{position:fixed;display:flex;bottom:10px;right:10px;left:10px;z-index:25;border:1px solid var(--line);background:rgba(13,17,32,.88);backdrop-filter:blur(18px);border-radius:22px;padding:7px;justify-content:space-around;box-shadow:0 16px 50px rgba(0,0,0,.36)}.light .mobileNav{background:rgba(255,255,255,.88)}.mobileNav button{border:0;background:none;color:var(--muted);font-size:9px;padding:6px 10px;border-radius:13px}.mobileNav button.active{background:rgba(134,88,255,.17);color:var(--text)}.mobileNav .plus{width:47px;height:47px;border-radius:50%;background:linear-gradient(135deg,var(--purple2),var(--purple));color:#fff;font-size:24px;margin-top:-21px;box-shadow:0 10px 25px rgba(134,88,255,.35)}.pricing{grid-template-columns:1fr}}
+@media(max-width:850px){.authShell{grid-template-columns:1fr}.authVisual{display:none}.authForm{padding:28px}}
+@media(max-width:640px){.rewardBanner{flex-wrap:wrap}.rewardActions{width:100%;justify-content:flex-start}}
+@media(max-width:520px){.authForm{padding:20px}.formGrid{grid-template-columns:1fr}.taskActions{opacity:1}.calDay{border-radius:10px;padding:4px 2px;gap:2px}.calDayNum{font-size:12px}.calDayDot{width:4px;height:4px}.calDayHoliday{font-size:7px}.calWeek{gap:4px}.calGrid{gap:4px}.calWeekDay{font-size:9px;padding:5px 2px}}
+</style>
+</head>
+<body>
+
+<div class="authGate" id="authGate">
+  <div class="authShell">
+    <section class="authVisual">
+      <div class="authLogo"><div class="logo">ز</div><div><h2>زمانتو</h2><small>مدیریت هوشمند زمان</small></div></div>
+      <div>
+        <h3>زمانت را مدیریت کن،<br><span style="color:var(--purple2)">زندگیت را بساز.</span></h3>
+        <p>برنامه‌ریزی، تمرکز، عادت‌ها و تحلیل عملکردت را یک‌جا داشته باش.</p>
+        <div class="authFeatureGrid">
+          <div class="authFeature"><b>🗓 برنامه‌ریزی هوشمند</b><span>روزت را با Time Blocking مرتب کن.</span></div>
+          <div class="authFeature"><b>🎯 تمرکز عمیق</b><span>جلسه‌های تمرکزت را ثبت و دنبال کن.</span></div>
+          <div class="authFeature"><b>🔥 عادت‌سازی</b><span>عادت‌هایی بساز که ماندگار شوند.</span></div>
+          <div class="authFeature"><b>📊 تحلیل عملکرد</b><span>بدان وقتت واقعاً کجا می‌رود.</span></div>
+        </div>
+      </div>
+      <small style="color:var(--muted);font-size:9px">ورود با شماره موبایل ایرانی • اتصال به سرور زمانتو</small>
+    </section>
+    <section class="authForm">
+      <div class="authBox">
+        <div id="phoneStep">
+          <h1>خوش اومدی 👋</h1>
+          <p class="lead">شماره موبایلت را وارد کن تا یک کد تأیید برایت ارسال کنیم.</p>
+          <div class="authField">
+            <label>شماره موبایل</label>
+            <input id="phoneInput" type="tel" inputmode="numeric" maxlength="11" placeholder="09xxxxxxxxx">
+          </div>
+          <button class="authPrimary" id="sendCodeBtn">ارسال کد تأیید</button>
+          <div class="authStatus" id="phoneStatus"></div>
+          <div class="authHint">با ورود، شرایط استفاده از زمانتو را می‌پذیری.</div>
+        </div>
+        <div id="otpStep" style="display:none">
+          <h1>کد تأیید 🔐</h1>
+          <p class="lead">کد ۴ رقمی که به شماره <b id="otpPhoneDisplay" style="color:var(--purple2);direction:ltr;display:inline-block">—</b> ارسال شد را وارد کن.</p>
+          <div class="otpBoxes" id="otpBoxes">
+            <input type="tel" maxlength="1" class="otpDigit" inputmode="numeric">
+            <input type="tel" maxlength="1" class="otpDigit" inputmode="numeric">
+            <input type="tel" maxlength="1" class="otpDigit" inputmode="numeric">
+            <input type="tel" maxlength="1" class="otpDigit" inputmode="numeric">
+          </div>
+          <button class="authPrimary" id="verifyCodeBtn">تأیید و ورود</button>
+          <div class="otpFooter">
+            <button class="otpLink" id="resendBtn" disabled>ارسال مجدد کد (<span id="resendTimer">60</span>)</button>
+            <button class="otpLink" id="changePhoneBtn">← تغییر شماره</button>
+          </div>
+          <div class="authStatus" id="otpStatus"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="app" id="mainApp">
+<aside class="sidebar">
+  <div class="brand"><div class="logo">ز</div><div><h1>زمانتو</h1><small>مدیریت هوشمند زمان</small></div></div>
+  <nav id="sideNav">
+    <button class="active" data-page="home"><i></i>خانه</button>
+    <button data-page="planner"><i></i>برنامه‌ریزی</button>
+    <button data-page="calendar"><i></i>تقویم</button>
+    <button data-page="focus"><i></i>تمرکز</button>
+    <button data-page="habits"><i></i>عادت‌ها</button>
+    <button data-page="stats"><i></i>تحلیل</button>
+    <button data-page="profile"><i></i>پروفایل</button>
+  </nav>
+  <div class="sidebarBottom">
+    <div class="upgrade"><strong>زمانتو پرو ✦</strong><p>گزارش‌های پیشرفته و امکانات هوشمند.</p><button class="cta" onclick="showPage('pricing')">ارتقا</button></div>
+  </div>
+</aside>
+
+<main class="main">
+<section class="page active" id="home">
+  <div class="topbar">
+    <div class="hello"><small id="todayDate">—</small><h2 id="greeting">سلام 👋</h2></div>
+    <div class="actions"><button class="icon" id="theme">◐</button><button class="icon" id="notify">♧</button><button class="cta" id="newTask">＋ کار جدید</button></div>
+  </div>
+
+  <div class="rewardBanner" id="rewardBanner" style="display:none">
+    <div class="rewardIcon">🎁</div>
+    <div class="rewardBody">
+      <b>پروفایلت را تکمیل کن</b>
+      <span>و <strong>۳۰٪ تخفیف</strong> روی خرید پرو دریافت کن!</span>
+    </div>
+    <div class="rewardActions">
+      <button class="cta" onclick="showPage('profile')">تکمیل ←</button>
+      <button class="rewardClose" id="rewardClose" title="بعداً">×</button>
+    </div>
+  </div>
+
+  <div class="rewardBanner rewardBannerActive" id="discountBanner" style="display:none">
+    <div class="rewardIcon">🎉</div>
+    <div class="rewardBody">
+      <b>کد تخفیف ۳۰٪ فعال شد!</b>
+      <span>کد: <strong id="discountCode" style="color:var(--purple2);font-family:monospace;letter-spacing:1px">ZAMAN30</strong></span>
+    </div>
+    <div class="rewardActions">
+      <button class="cta" id="copyDiscount">کپی کد</button>
+      <button class="cta" onclick="showPage('pricing')">خرید پرو</button>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="heroMain">
+      <div class="progressRing"><div class="progressText"><b id="progressPercent">۰٪</b><span>پیشرفت امروز</span></div></div>
+      <div class="heroCopy">
+        <h3 id="heroTitle">امروزت را بساز 🚀</h3>
+        <p id="heroDesc">با برنامه‌ریزی درست، هر روز یک قدم به هدفت نزدیک‌تر شو.</p>
+        <button class="cta" onclick="showPage('planner')">شروع برنامه ▷</button>
+        <div class="miniStats">
+          <div class="mini"><b id="statDone">۰</b><span>انجام‌شده</span></div>
+          <div class="mini"><b id="statTodo">۰</b><span>در انتظار</span></div>
+          <div class="mini"><b id="statTotal">۰</b><span>مجموع</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <section class="card">
+      <div class="cardHead"><h3>برنامه امروز</h3>
+        <div class="taskFilters" id="taskFilters">
+          <button class="filterBtn active" data-filter="all">همه</button>
+          <button class="filterBtn" data-filter="todo">در انتظار</button>
+          <button class="filterBtn" data-filter="done">انجام‌شده</button>
+        </div>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+    <section class="card">
+      <div class="cardHead"><h3>تمرکز عمیق</h3><span class="muted">پومودورو</span></div>
+      <div class="focusBox">
+        <div class="focusModePill" id="focusMode">جلسه تمرکز</div>
+        <div class="timer" id="timerRing"><div class="timerInner"><b id="timer">25:00</b><span>دقیقه</span></div></div>
+        <div class="focusControls">
+          <button class="cta" id="startTimer">شروع</button>
+          <button class="ghost" id="resetTimer">↻</button>
+        </div>
+        <div class="focusNote" id="focusNote">جلسات امروز: ۰</div>
+      </div>
+    </section>
+  </div>
+
+  <div class="bottomGrid">
+    <section class="card">
+      <div class="cardHead"><h3>عادت‌های امروز</h3><span class="muted" style="cursor:pointer" onclick="showPage('habits')">مشاهده همه</span></div>
+      <div class="habits" id="homeHabits"></div>
+    </section>
+    <section class="card">
+      <div class="cardHead"><h3>تحلیل هفتگی</h3><span class="muted">این هفته</span></div>
+      <div class="chart" id="weekChart"></div>
+      <div class="labels"><span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span></div>
+      <div class="chartSummary">
+        <div class="summary"><b id="weekCompletion">۰٪</b>تکمیل کارها</div>
+        <div class="summary"><b id="weekFocus">۰ دقیقه</b>زمان تمرکز</div>
+      </div>
+    </section>
+  </div>
+
+  <section class="ai">
+    <div class="bot">🤖</div>
+    <div><h3>پیشنهاد زمانتو ✨</h3><p id="aiSuggest">به‌زودی پیشنهادهای هوشمند بر اساس عملکردت اینجا نمایش داده می‌شود.</p></div>
+    <button class="arrow" onclick="toast('نسخه هوشمند زمانتو به‌زودی فعال می‌شود.','')">‹</button>
+  </section>
+</section>
+
+<section class="page" id="planner">
+  <div class="topbar"><div class="hello"><small>برنامه‌ریزی</small><h2>هفته‌ات را هوشمند بچین</h2></div><button class="cta" id="addPlanner">＋ کار جدید</button></div>
+  <section class="card">
+    <div class="cardHead"><h3>همه کارها</h3><span class="muted" id="plannerCount">۰ مورد</span></div>
+    <div class="timeline" id="plannerList"></div>
+  </section>
+</section>
+
+<section class="page" id="calendar">
+  <div class="topbar">
+    <div class="hello"><small>تقویم شمسی</small><h2 id="calTitle">—</h2></div>
+    <div class="actions">
+      <button class="icon" id="calPrev" title="ماه قبل">‹</button>
+      <button class="ghost" id="calToday">امروز</button>
+      <button class="icon" id="calNext" title="ماه بعد">›</button>
+      <button class="cta" id="addCalTask">＋ کار جدید</button>
+    </div>
+  </div>
+
+  <section class="card">
+    <div class="calWeek">
+      <div class="calWeekDay">ش</div>
+      <div class="calWeekDay">ی</div>
+      <div class="calWeekDay">د</div>
+      <div class="calWeekDay">س</div>
+      <div class="calWeekDay">چ</div>
+      <div class="calWeekDay">پ</div>
+      <div class="calWeekDay friday">ج</div>
+    </div>
+    <div class="calGrid" id="calGrid"></div>
+  </section>
+
+  <section class="card" style="margin-top:16px">
+    <div class="cardHead">
+      <h3 id="dayTitle">کارهای این روز</h3>
+      <span class="muted" id="dayCount">۰ مورد</span>
+    </div>
+    <div class="timeline" id="dayList"></div>
+  </section>
+</section>
+
+<section class="page" id="focus">
+  <div class="topbar"><div class="hello"><small>تمرکز</small><h2>زمان را به نتیجه تبدیل کن</h2></div><button class="ghost" id="focusSettings">⚙ تنظیمات</button></div>
+  <section class="card">
+    <div class="focusBox" style="min-height:430px">
+      <div class="focusModePill" id="focusModeBig">جلسه تمرکز</div>
+      <div class="timer" id="timerRingBig" style="width:235px;height:235px"><div class="timerInner"><b id="timerBig">25:00</b><span>دقیقه</span></div></div>
+      <div class="focusControls">
+        <button class="cta" id="bigStart">شروع</button>
+        <button class="ghost" id="bigReset">↻</button>
+        <button class="ghost" id="bigSkip">رد کردن</button>
+      </div>
+      <div class="focusNote" id="focusNoteBig">جلسات امروز: ۰ / ۴</div>
+    </div>
+  </section>
+</section>
+
+<section class="page" id="habits">
+  <div class="topbar"><div class="hello"><small>عادت‌ها</small><h2>عادت‌هایی که می‌مانند</h2></div><button class="cta" id="newHabit">＋ عادت جدید</button></div>
+  <section class="card">
+    <div class="cardHead"><h3>عادت‌های من</h3><span class="muted" id="habitsCount">۰ عادت</span></div>
+    <div class="habits" id="habitsList"></div>
+  </section>
+</section>
+
+<section class="page" id="stats">
+  <div class="topbar"><div class="hello"><small>تحلیل</small><h2>داده‌ها، نه حدس‌ها</h2></div></div>
+  <section class="card">
+    <div class="cardHead"><h3>عملکرد هفته</h3><span class="muted" id="statsWeekTotal">—</span></div>
+    <div class="bottomGrid">
+      <div class="summary"><b id="statsCount">۰</b>کار انجام‌شده این هفته</div>
+      <div class="summary"><b id="statsFocus">۰ دقیقه</b>زمان تمرکز این هفته</div>
+    </div>
+    <div class="chart" style="height:240px;margin-top:16px" id="statsChart"></div>
+    <div class="labels"><span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span>ج</span></div>
+  </section>
+  <section class="card" style="margin-top:16px">
+    <div class="cardHead"><h3>عادت‌ها</h3><span class="muted">۷ روز گذشته</span></div>
+    <div class="habits" id="statsHabits"></div>
+  </section>
+</section>
+
+<section class="page" id="profile">
+  <div class="topbar"><div class="hello"><small>حساب کاربری</small><h2>پروفایل و تنظیمات</h2></div></div>
+  <div class="grid2">
+    <section class="card">
+      <div class="cardHead"><h3>پروفایل من</h3><span class="muted">اطلاعات شخصی</span></div>
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px">
+        <div class="bot" style="width:64px;height:64px;border-radius:20px;font-size:30px">👤</div>
+        <div><b id="profileDisplayName">—</b><div class="muted" id="profileGoal">شماره: —</div></div>
+      </div>
+      <div class="field"><label>نام</label><input id="profileNameInput" class="profileInput" placeholder="نام شما"></div>
+      <div class="field"><label>ایمیل (اختیاری)</label><input id="profileEmailInput" class="profileInput" type="email" placeholder="you@example.com" dir="ltr"></div>
+      <div class="field"><label>هدف اصلی</label><input id="profileGoalInput" class="profileInput" placeholder="مثلاً افزایش تمرکز"></div>
+      <div class="field"><label>نوع کاربری</label>
+        <select id="profileRoleInput" class="profileInput">
+          <option>دانشجو</option><option>فریلنسر</option><option>کارمند</option><option>ورزشکار</option><option>توسعه فردی</option><option>ترکیبی</option>
+        </select>
+      </div>
+      <div class="modalBtns"><button class="cta" id="saveProfile">ذخیره تغییرات</button></div>
+    </section>
+    <section class="card">
+      <div class="cardHead"><h3>تنظیمات</h3><span class="muted">شخصی‌سازی</span></div>
+      <div class="habit"><div class="habitInfo"><div class="habitIcon">🌙</div><div><b>حالت شب</b><small>ظاهر زمانتو</small></div></div><button class="ghost" id="profileThemeBtn">تغییر</button></div>
+      <div class="habit" style="margin-top:9px"><div class="habitInfo"><div class="habitIcon">🔔</div><div><b>یادآوری‌ها</b><small>اعلان‌های برنامه</small></div></div><button class="ghost" id="profileNotifyBtn">فعال</button></div>
+      <div class="habit" style="margin-top:9px"><div class="habitInfo"><div class="habitIcon">⏱</div><div><b>تنظیم تایمر</b><small>مدت جلسه و استراحت</small></div></div><button class="ghost" id="openTimerSettings">تنظیم</button></div>
+      <div class="habit" style="margin-top:9px"><div class="habitInfo"><div class="habitIcon">🧹</div><div><b>پاک کردن داده‌ها</b><small>اطلاعات ذخیره‌شده روی دستگاه</small></div></div><button class="ghost" id="clearDataBtn">پاکسازی</button></div>
+      <div class="habit" style="margin-top:9px"><div class="habitInfo"><div class="habitIcon">↪️</div><div><b>خروج از حساب</b><small>برای ورود با شماره دیگر</small></div></div><button class="ghost" id="logoutBtn">خروج</button></div>
+    </section>
+  </div>
+</section>
+
+<section class="page" id="pricing">
+  <div class="topbar"><div class="hello"><small>زمانتو پرو</small><h2>پلنی را انتخاب کن که به کارت می‌آید</h2></div></div>
+  <div class="pricing">
+    <div class="plan"><h3>رایگان</h3><div class="price">۰ تومان</div><p class="muted">برای شروع</p><ul><li>برنامه روزانه</li><li>تقویم پایه</li><li>تایمر تمرکز</li><li>۳ عادت فعال</li></ul><button class="ghost">پلن فعلی</button></div>
+    <div class="plan featured"><div class="ribbon">محبوب‌ترین</div><h3>پرو</h3><div class="price">۱۹۹ هزار</div><p class="muted">برای کاربر جدی</p><ul><li>Time Blocking پیشرفته</li><li>عادت نامحدود</li><li>گزارش کامل</li><li>ویجت و همگام‌سازی</li><li>شخصی‌سازی</li></ul><button class="cta" onclick="toast('درگاه پرداخت در نسخه بعدی متصل می‌شود.','')">خرید پرو</button></div>
+    <div class="plan"><h3>هوشمند</h3><div class="price">۳۹۹ هزار</div><p class="muted">با قدرت AI</p><ul><li>تمام امکانات پرو</li><li>برنامه‌ریزی هوشمند</li><li>تقسیم پروژه‌ها</li><li>تحلیل هوشمند</li><li>مربی بهره‌وری</li></ul><button class="cta" onclick="toast('اتصال AI در نسخه بعدی.','')">شروع هوشمند</button></div>
+  </div>
+</section>
+</main>
+
+<div class="mobileNav" id="mobileNav">
+  <button class="active" data-page="home">خانه</button>
+  <button data-page="calendar">تقویم</button>
+  <button class="plus" id="mobileAdd">+</button>
+  <button data-page="habits">عادت‌ها</button>
+  <button data-page="stats">تحلیل</button>
+</div>
+</div>
+
+<div class="modalBack" id="taskModal">
+  <div class="modal modalWide">
+    <h3 id="taskModalTitle">ساخت کار جدید</h3>
+    <div class="formGrid">
+      <div class="field"><label>عنوان</label><input id="taskTitle" placeholder="مثلاً طراحی صفحه ورود"></div>
+      <div class="field">
+        <label>تاریخ</label>
+        <input id="taskDate" type="hidden">
+        <button type="button" class="profileInput jDateBtn" id="taskDateBtn">
+          <span id="taskDateDisplay">امروز</span>
+          <span style="color:var(--muted)">📅</span>
+        </button>
+      </div>
+      <div class="field"><label>زمان</label><input id="taskTime" placeholder="مثلاً 16:00"></div>
+      <div class="field"><label>دسته‌بندی</label><select id="taskCategory"><option>پروژه</option><option>کار</option><option>یادگیری</option><option>سلامت</option><option>شخصی</option></select></div>
+      <div class="field"><label>اولویت</label><select id="taskPriority"><option value="high">بالا</option><option value="medium" selected>متوسط</option><option value="low">کم</option></select></div>
+      <div class="field"><label>مدت</label><input id="taskDuration" placeholder="مثلاً ۹۰ دقیقه"></div>
+      <div class="field"><label>توضیح کوتاه</label><input id="taskSub" placeholder="مثلاً پروژه زمانتو"></div>
+    </div>
+    <div class="modalBtns"><button class="cta" id="saveTask">ذخیره</button><button class="ghost" id="closeTaskModal">انصراف</button></div>
+  </div>
+</div>
+
+<div class="modalBack" id="habitModal">
+  <div class="modal">
+    <h3 id="habitModalTitle">عادت جدید</h3>
+    <div class="field"><label>نام عادت</label><input id="habitName" placeholder="مثلاً مطالعه روزانه"></div>
+    <div class="field"><label>آیکون (ایموجی)</label><input id="habitIcon" placeholder="مثلاً 📚" maxlength="2"></div>
+    <div class="field"><label>هدف روزانه (اختیاری)</label><input id="habitGoal" placeholder="مثلاً ۳۰ دقیقه"></div>
+    <div class="modalBtns"><button class="cta" id="saveHabit">ذخیره</button><button class="ghost" id="closeHabitModal">انصراف</button></div>
+  </div>
+</div>
+
+<div class="modalBack" id="timerModal">
+  <div class="modal">
+    <h3>تنظیمات تایمر</h3>
+    <div class="field"><label>مدت جلسه تمرکز (دقیقه)</label><input id="focusMin" type="number" min="1" max="120" value="25"></div>
+    <div class="field"><label>استراحت کوتاه (دقیقه)</label><input id="breakMin" type="number" min="1" max="60" value="5"></div>
+    <div class="field"><label>استراحت بلند (دقیقه)</label><input id="longBreakMin" type="number" min="1" max="60" value="15"></div>
+    <div class="field"><label>تعداد جلسات تا استراحت بلند</label><input id="cycles" type="number" min="2" max="10" value="4"></div>
+    <div class="modalBtns"><button class="cta" id="saveTimer">ذخیره</button><button class="ghost" id="closeTimerModal">انصراف</button></div>
+  </div>
+</div>
+
+<div class="modalBack" id="jdpModal">
+  <div class="modal">
+    <div class="jdpHead">
+      <button class="icon" id="jdpPrev" title="ماه قبل">‹</button>
+      <b id="jdpTitle">—</b>
+      <button class="icon" id="jdpNext" title="ماه بعد">›</button>
+    </div>
+    <div class="calWeek" style="margin-top:14px">
+      <div class="calWeekDay">ش</div>
+      <div class="calWeekDay">ی</div>
+      <div class="calWeekDay">د</div>
+      <div class="calWeekDay">س</div>
+      <div class="calWeekDay">چ</div>
+      <div class="calWeekDay">پ</div>
+      <div class="calWeekDay friday">ج</div>
+    </div>
+    <div class="calGrid" id="jdpGrid"></div>
+    <div class="modalBtns" style="margin-top:14px">
+      <button class="cta" id="jdpTodayBtn">امروز</button>
+      <button class="ghost" id="jdpClose">بستن</button>
+    </div>
+  </div>
+</div>
+<script>
+/* ============ زمانتو V5.1 — PostgreSQL Connected ============ */
+const KEY='zamaneto_v33';
+const AUTH='zamaneto_auth_v31';
+
+/* ==== Jalaali Calendar ==== */
+function div(a,b){return ~~(a/b)}
+function mod(a,b){return a-~~(a/b)*b}
+function jalCal(jy){
+  const breaks=[-61,9,38,199,426,686,756,818,1111,1181,1210,1635,2060,2097,2192,2262,2324,2394,2456,3178];
+  let bl=breaks.length,gy=jy+621,leapJ=-14,jp=breaks[0],jm,jump,leap,leapG,march,n,i;
+  if(jy<jp||jy>=breaks[bl-1]) throw new Error('Invalid Jalaali year '+jy);
+  for(i=1;i<bl;i++){jm=breaks[i];jump=jm-jp;if(jy<jm)break;leapJ+=div(jump,33)*8+div(mod(jump,33),4);jp=jm}
+  n=jy-jp;leapJ+=div(n,33)*8+div(mod(n,33)+3,4);
+  if(mod(jump,33)===4 && jump-n===4) leapJ++;
+  leapG=div(gy,4)-div((div(gy,100)+1)*3,4)-150;
+  march=20+leapJ-leapG;
+  if(jump-n<6) n=n-jump+div(jump+4,33)*33;
+  leap=mod(mod(n+1,33)-1,4);
+  if(leap===-1) leap=4;
+  return {leap:leap,gy:gy,march:march};
+}
+function isLeapJalaaliYear(jy){return jalCal(jy).leap===0}
+function jalaaliMonthLength(jy,jm){return (jm<=6)?31:(jm<=11)?30:(isLeapJalaaliYear(jy)?30:29)}
+function g2d(gy,gm,gd){
+  let d=div((gy+div(gm-8,6)+100100)*1461,4)+div(153*mod(gm+9,12)+2,5)+gd-34840408;
+  d=d-div(div(gy+100100+div(gm-8,6),100)*3,4)+752;
+  return d;
+}
+function d2g(jdn){
+  let j=4*jdn+139361631;
+  j=j+div(div(4*jdn+183187720,146097)*3,4)*4-3908;
+  let i=div(mod(j,1461),4)*5+308;
+  let gd=div(mod(i,153),5)+1;
+  let gm=mod(div(i,153),12)+1;
+  let gy=div(j,1461)-100100+div(8-gm,6);
+  return {gy,gm,gd};
+}
+function j2d(jy,jm,jd){
+  const r=jalCal(jy);
+  return g2d(r.gy,3,r.march)+(jm-1)*31-div(jm,7)*(jm-7)+jd-1;
+}
+function d2j(jdn){
+  const g=d2g(jdn);
+  let jy=g.gy-621;
+  const r=jalCal(jy);
+  const jdn1f=g2d(g.gy,3,r.march);
+  let k=jdn-jdn1f, jm, jd;
+  if(k>=0){
+    if(k<=185){jm=1+div(k,31);jd=mod(k,31)+1;return{jy,jm,jd}}
+    k-=186;
+  }else{
+    jy-=1;
+    k+=179;
+    if(isLeapJalaaliYear(jy))k+=1;
+  }
+  jm=7+div(k,30);
+  jd=mod(k,30)+1;
+  return {jy,jm,jd};
+}
+function toISO(gy,gm,gd){
+  const p=n=>String(n).padStart(2,'0');
+  return `${gy}-${p(gm)}-${p(gd)}`;
+}
+function gToJISO(iso){
+  const [gy,gm,gd]=iso.split('-').map(Number);
+  return d2j(g2d(gy,gm,gd));
+}
+function jToGISO(jy,jm,jd){
+  const g=d2g(j2d(jy,jm,jd));
+  return toISO(g.gy,g.gm,g.gd);
+}
+const J_MONTHS=['فروردین','اردیبهشت','خرداد','تیر','مرداد','شهریور','مهر','آبان','آذر','دی','بهمن','اسفند'];
+
+/* ==== State ==== */
+const DEFAULT={
+  theme:'dark',
+  notifications:true,
+  user:{phone:'',name:'',email:'',goal:'',role:'ترکیبی',discountEarned:false},
+  tasks:[],
+  habits:[
+    {id:'h1',name:'مطالعه روزانه',icon:'📖',goal:'۳۰ دقیقه',log:{},streak:0},
+    {id:'h2',name:'ورزش',icon:'🏃',goal:'۲۰ دقیقه',log:{},streak:0},
+    {id:'h3',name:'نوشیدن آب',icon:'💧',goal:'۸ لیوان',log:{},streak:0}
+  ],
+  focusSessions:{},
+  timer:{focus:25,short:5,long:15,cycles:4},
+  bannerDismissed:false
+};
+
+let state=load();
+let filter='all';
+let editTaskId=null;
+let editHabitId=null;
+let pendingOTP=null;
+let pendingPhone=null;
+let resendInterval=null;
+
+function load(){
+  try{
+    const s=JSON.parse(localStorage.getItem(KEY)||'null');
+    if(!s) return structuredClone(DEFAULT);
+    const merged={
+      ...DEFAULT,...s,
+      user:{...DEFAULT.user,...(s.user||{})},
+      timer:{...DEFAULT.timer,...(s.timer||{})},
+      tasks:Array.isArray(s.tasks)?s.tasks:DEFAULT.tasks,
+      habits:Array.isArray(s.habits)?s.habits:DEFAULT.habits,
+      focusSessions:s.focusSessions||{}
+    };
+    const today=todayKey();
+    merged.tasks.forEach(t=>{
+      if(!t.date) t.date=t.createdAt||today;
+      if(!t.createdAt) t.createdAt=t.date;
+    });
+    return merged;
+  }catch{return structuredClone(DEFAULT)}
+}
+let hydrating=false;
+let saveTimer=null;
+let authToken=null;
+
+function save(){
+  localStorage.setItem(KEY,JSON.stringify(state));
+  if(!hydrating) scheduleRemoteStateSave();
+}
+function getAuth(){
+  try{return JSON.parse(localStorage.getItem(AUTH)||'null')}catch{return null}
+}
+function setAuth(v){
+  localStorage.setItem(AUTH,JSON.stringify(v));
+  authToken=v?.token||null;
+}
+function clearAuth(){
+  authToken=null;
+  localStorage.removeItem(AUTH);
+}
+function getToken(){
+  if(authToken) return authToken;
+  const a=getAuth();
+  authToken=a?.token||null;
+  return authToken;
+}
+async function apiFetch(url,options={}){
+  const headers=new Headers(options.headers||{});
+  if(options.body!==undefined&&!headers.has('Content-Type')) headers.set('Content-Type','application/json');
+  const token=getToken();
+  if(token) headers.set('Authorization','Bearer '+token);
+  const response=await fetch(url,{...options,headers});
+  let body=null;
+  try{body=await response.json()}catch{}
+  if(!response.ok){
+    const err=new Error(body?.error||`خطای سرور (${response.status})`);
+    err.status=response.status;err.body=body;throw err;
+  }
+  return body;
+}
+async function syncRemoteState(){
+  const token=getToken();
+  if(!token||hydrating)return;
+  try{
+    await apiFetch('/api/state',{method:'PUT',body:JSON.stringify({data:{
+      theme:state.theme,
+      notifications:state.notifications,
+      bannerDismissed:state.bannerDismissed,
+      tasks:state.tasks,
+      habits:state.habits,
+      focusSessions:state.focusSessions,
+      timer:state.timer,
+      discountEarned:state.discountEarned
+    }})});
+  }catch(err){console.warn('[زمانتو] state sync failed:',err.message)}
+}
+function scheduleRemoteStateSave(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(syncRemoteState,450);
+}
+async function syncProfile(){
+  if(!getToken())return;
+  try{
+    await apiFetch('/api/me',{
+      method:'PUT',
+      body:JSON.stringify({
+        name:state.user.name,
+        email:state.user.email,
+        goal:state.user.goal,
+        role:state.user.role
+      })
+    });
+  }catch(err){console.warn('[زمانتو] profile sync failed:',err.message)}
+}
+async function hydrateFromServer(){
+  if(!getToken())return false;
+  try{
+    hydrating=true;
+    const result=await apiFetch('/api/state');
+    const serverUser=result.user||{};
+    const serverData=result.data||{};
+    state={
+      ...state,
+      ...serverData,
+      user:{...state.user,...serverUser},
+      timer:{...state.timer,...(serverData.timer||{})},
+      tasks:Array.isArray(serverData.tasks)?serverData.tasks:state.tasks,
+      habits:Array.isArray(serverData.habits)?serverData.habits:state.habits,
+      focusSessions:serverData.focusSessions&&typeof serverData.focusSessions==='object'?serverData.focusSessions:state.focusSessions
+    };
+    localStorage.setItem(KEY,JSON.stringify(state));
+    return true;
+  }catch(err){
+    if(err.status===401){clearAuth();return false}
+    toast('اتصال به سرور برقرار نشد؛ فعلاً از اطلاعات محلی استفاده می‌کنیم.','error');
+    return false;
+  }finally{hydrating=false}
+}
+
+function todayKey(){
+  const d=new Date(),p=n=>String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
+}
+function faNum(n){return String(n).replace(/\d/g,d=>'۰۱۲۳۴۵۶۷۸۹'[d])}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function toast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show '+type;
+  setTimeout(()=>t.className='toast '+type,2800);
+}
+function jalaliLong(){
+  const opts={weekday:'long',year:'numeric',month:'long',day:'numeric'};
+  try{return new Intl.DateTimeFormat('fa-IR',opts).format(new Date())}
+  catch{return new Date().toLocaleDateString('fa-IR')}
+}
+function greeting(){
+  const h=new Date().getHours();
+  if(h<5)return'شب بخیر';if(h<12)return'صبح بخیر';if(h<17)return'ظهر بخیر';if(h<20)return'عصر بخیر';return'شب بخیر';
+}
+function validIranPhone(p){return /^09\d{9}$/.test(p)}
+function iconFor(cat){return({پروژه:'💡',کار:'💼',یادگیری:'📖',سلامت:'🏃',شخصی:'📝'})[cat]||'📝'}
+function priLabel(p){return p==='high'?'بالا':p==='low'?'کم':'متوسط'}
+function priClass(p){return p==='high'?'high':p==='low'?'low':'medium'}
+function jalaliShortFromISO(iso){
+  const j=gToJISO(iso);
+  return `${faNum(j.jy)}/${faNum(String(j.jm).padStart(2,'0'))}/${faNum(String(j.jd).padStart(2,'0'))}`;
+}
+function jalaliDisplayFromISO(iso){
+  if(!iso) return 'انتخاب کنید';
+  const j=gToJISO(iso);
+  const today=todayKey();
+  if(iso===today) return `امروز (${faNum(j.jd)} ${J_MONTHS[j.jm-1]})`;
+  return `${faNum(j.jd)} ${J_MONTHS[j.jm-1]} ${faNum(j.jy)}`;
+}
+
+/* ==== Navigation ==== */
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('active',p.id===id));
+  document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===id));
+  window.scrollTo({top:0,behavior:'smooth'});
+  if(id==='planner') renderPlanner();
+  if(id==='calendar'){ensureCalInit();renderCalendar();renderDayList();}
+  if(id==='habits') renderHabits();
+  if(id==='stats') renderStats();
+  if(id==='profile') renderProfile();
+  if(id==='home'){renderBanners();renderHomeTasks();}
+}
+document.querySelectorAll('[data-page]').forEach(b=>b.onclick=()=>showPage(b.dataset.page));
+
+/* ==== Theme ==== */
+function applyTheme(){document.body.classList.toggle('light',state.theme==='light')}
+document.getElementById('theme').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';applyTheme();save()};
+document.getElementById('notify').onclick=()=>toast(state.notifications?'یادآوری‌ها فعال است.':'یادآوری‌ها غیرفعال است.','');
+
+/* ==== Topbar ==== */
+function renderTop(){
+  const name=state.user.name||'دوست من';
+  document.getElementById('greeting').textContent=`${greeting()} ${name} 👋`;
+  document.getElementById('todayDate').textContent=jalaliLong();
+}
+
+/* ==== Banners ==== */
+function isProfileComplete(){
+  const u=state.user;
+  return !!(u.name && u.name.trim().length>=2 && u.email && u.goal && u.goal.trim().length>=2);
+}
+function renderBanners(){
+  const reward=document.getElementById('rewardBanner');
+  const discount=document.getElementById('discountBanner');
+  if(!reward||!discount) return;
+  if(state.user.discountEarned){reward.style.display='none';discount.style.display='flex';}
+  else if(!isProfileComplete()&&!state.bannerDismissed){reward.style.display='flex';discount.style.display='none';}
+  else{reward.style.display='none';discount.style.display='none';}
+}
+document.getElementById('rewardClose').onclick=()=>{state.bannerDismissed=true;save();renderBanners()};
+document.getElementById('copyDiscount').onclick=()=>{
+  const code=document.getElementById('discountCode').textContent;
+  navigator.clipboard?.writeText(code).then(
+    ()=>toast('کد کپی شد: '+code,'success'),
+    ()=>toast('کد: '+code,'')
+  );
+};
+function checkDiscountEarned(){
+  if(!state.user.discountEarned&&isProfileComplete()){
+    state.user.discountEarned=true;save();
+    toast('🎉 تبریک! کد تخفیف ۳۰٪ فعال شد: ZAMAN30','success');
+    renderBanners();
+  }
+}
+
+/* ==== Progress Ring ==== */
+let ringVal=null,ringFrame=null;
+function ease(t){return 1-Math.pow(1-t,3)}
+function animRing(target){
+  const ring=document.querySelector('.progressRing');
+  const label=document.getElementById('progressPercent');
+  if(!ring||!label) return;
+  if(ringVal===null){ringVal=target;ring.style.setProperty('--progress',target+'%');label.textContent=faNum(target)+'٪';return;}
+  const start=ringVal,end=target,dur=760,t0=performance.now();
+  if(ringFrame) cancelAnimationFrame(ringFrame);
+  function step(now){
+    const t=Math.min((now-t0)/dur,1);
+    const v=start+(end-start)*ease(t);
+    ringVal=v;
+    ring.style.setProperty('--progress',v+'%');
+    label.textContent=faNum(Math.round(v))+'٪';
+    if(t<1) ringFrame=requestAnimationFrame(step);
+    else{ringVal=end;ring.style.setProperty('--progress',end+'%');label.textContent=faNum(end)+'٪';}
+  }
+  ringFrame=requestAnimationFrame(step);
+}
+
+/* ==== Tasks ==== */
+function tasksForDate(iso){return state.tasks.filter(t=>(t.date||t.createdAt||todayKey())===iso);}
+function applyFilter(list){
+  if(filter==='todo') return list.filter(t=>!t.done);
+  if(filter==='done') return list.filter(t=>t.done);
+  return list;
+}
+function taskRowHTML(t,extraMeta=''){
+  return `
+    <div class="item">
+      <div class="time">${esc(faNum(t.time||'—'))}</div>
+      <div class="task">
+        <div class="taskMain">
+          <div class="taskIcon">${t.icon||'📝'}</div>
+          <div>
+            <b class="${t.done?'completed':''}">${esc(t.title)}</b>
+            <div class="taskMeta">
+              <span>${esc(t.sub||'کار جدید')}</span>
+              <span class="priority ${priClass(t.priority)}">${priLabel(t.priority)}</span>
+              <span class="category">${esc(t.category||'شخصی')}</span>
+              ${t.duration?`<span class="category">⏱ ${esc(faNum(t.duration))}</span>`:''}
+              ${extraMeta}
+            </div>
+          </div>
+        </div>
+        <div class="taskActions">
+          <button class="taskAction" data-edit="${t.id}" title="ویرایش">✎</button>
+          <button class="taskAction" data-del="${t.id}" title="حذف">×</button>
+          <button class="check ${t.done?'done':''}" data-check="${t.id}">${t.done?'✓':''}</button>
+        </div>
+      </div>
+    </div>`;
+}
+function bindTaskRowEvents(scope){
+  scope.querySelectorAll('[data-check]').forEach(b=>b.onclick=()=>toggleTask(b.dataset.check));
+  scope.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>openTask(b.dataset.edit));
+  scope.querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>delTask(b.dataset.del));
+}
+function renderHomeTasks(){
+  const today=todayKey();
+  const list=applyFilter(tasksForDate(today));
+  const el=document.getElementById('timeline');
+  if(!list.length){
+    el.innerHTML='<div class="emptyTasks"><b>برای امروز کاری نداری ✨</b>روی «＋ کار جدید» بزن و برنامه امروزت رو بساز.</div>';
+  }else{
+    el.innerHTML=list.map(t=>taskRowHTML(t)).join('');
+    bindTaskRowEvents(el);
+  }
+  renderTodayProgress();
+}
+function renderTodayProgress(){
+  const today=todayKey();
+  const all=tasksForDate(today);
+  const total=all.length;
+  const done=all.filter(t=>t.done).length;
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('statDone').textContent=faNum(done);
+  document.getElementById('statTodo').textContent=faNum(total-done);
+  document.getElementById('statTotal').textContent=faNum(total);
+  const h=document.getElementById('heroTitle'),d=document.getElementById('heroDesc');
+  if(!total){h.textContent='امروزت را بساز 🚀';d.textContent='هنوز برنامه‌ای برای امروز نداری. یک کار اضافه کن و شروع کن.'}
+  else if(pct===100){h.textContent='بی‌نظیر بود! 🎉';d.textContent='همه کارهای امروزت را انجام دادی. وقت استراحته.'}
+  else if(pct>=70){h.textContent='داری عالی پیش می‌ری! 🔥';d.textContent=`${faNum(pct)}٪ برنامه امروزت انجام شده. فقط چند قدم دیگه.`}
+  else if(pct>=30){h.textContent='خوب داری جلو می‌ری 👌';d.textContent=`${faNum(pct)}٪ برنامه امروز انجام شده. ادامه بده.`}
+  else{h.textContent='زمانِ شروعه ⚡';d.textContent='اولین قدم رو بردار و روند رو راه بنداز.'}
+  animRing(pct);
+}
+function toggleTask(id){
+  const t=state.tasks.find(x=>x.id===id); if(!t) return;
+  t.done=!t.done;save();
+  renderHomeTasks();renderPlanner();
+  if(document.getElementById('calGrid')){renderCalendar();renderDayList();}
+  renderWeekChart();
+}
+function delTask(id){
+  const t=state.tasks.find(x=>x.id===id); if(!t) return;
+  if(!confirm(`کار «${t.title}» حذف شود؟`)) return;
+  state.tasks=state.tasks.filter(x=>x.id!==id);save();
+  toast('کار حذف شد.','success');
+  renderHomeTasks();renderPlanner();
+  if(document.getElementById('calGrid')){renderCalendar();renderDayList();}
+  renderWeekChart();
+}
+
+/* ==== Task Modal ==== */
+function openTask(id=null,presetDate=null){
+  editTaskId=id;
+  const t=id?state.tasks.find(x=>x.id===id):null;
+  document.getElementById('taskModalTitle').textContent=id?'ویرایش کار':'ساخت کار جدید';
+  document.getElementById('taskTitle').value=t?.title||'';
+  const initialDate=t?.date||presetDate||cal.selectedISO||todayKey();
+  document.getElementById('taskDate').value=initialDate;
+  document.getElementById('taskDateDisplay').textContent=jalaliDisplayFromISO(initialDate);
+  document.getElementById('taskTime').value=t?.time||'';
+  document.getElementById('taskCategory').value=t?.category||'پروژه';
+  document.getElementById('taskPriority').value=t?.priority||'medium';
+  document.getElementById('taskDuration').value=t?.duration||'';
+  document.getElementById('taskSub').value=t?.sub||'';
+  document.getElementById('taskModal').classList.add('show');
+}
+document.getElementById('newTask').onclick=()=>openTask(null,todayKey());
+document.getElementById('addPlanner').onclick=()=>openTask(null,todayKey());
+document.getElementById('mobileAdd').onclick=()=>openTask(null,todayKey());
+document.getElementById('addCalTask').onclick=()=>openTask(null,cal.selectedISO||todayKey());
+document.getElementById('closeTaskModal').onclick=()=>{editTaskId=null;document.getElementById('taskModal').classList.remove('show')};
+
+document.getElementById('saveTask').onclick=()=>{
+  const title=document.getElementById('taskTitle').value.trim();
+  if(!title) return toast('عنوان کار را وارد کن.','error');
+  const date=document.getElementById('taskDate').value||todayKey();
+  const data={
+    title,date,
+    time:document.getElementById('taskTime').value.trim()||'—',
+    category:document.getElementById('taskCategory').value,
+    priority:document.getElementById('taskPriority').value,
+    duration:document.getElementById('taskDuration').value.trim(),
+    sub:document.getElementById('taskSub').value.trim()||'کار جدید',
+  };
+  if(editTaskId){
+    const t=state.tasks.find(x=>x.id===editTaskId);
+    if(t) Object.assign(t,data,{icon:iconFor(data.category)});
+    toast('تغییرات ذخیره شد.','success');
+  }else{
+    state.tasks.push({id:'t_'+Date.now().toString(36),...data,icon:iconFor(data.category),done:false,createdAt:data.date});
+    toast('کار اضافه شد.','success');
+  }
+  save();editTaskId=null;
+  document.getElementById('taskModal').classList.remove('show');
+  renderHomeTasks();renderPlanner();
+  if(document.getElementById('calGrid')){renderCalendar();renderDayList();}
+  renderWeekChart();
+};
+
+document.querySelectorAll('#taskFilters .filterBtn').forEach(b=>b.onclick=()=>{
+  filter=b.dataset.filter;
+  document.querySelectorAll('#taskFilters .filterBtn').forEach(x=>x.classList.toggle('active',x===b));
+  renderHomeTasks();
+});
+
+/* ==== Planner ==== */
+function renderPlanner(){
+  const el=document.getElementById('plannerList');
+  document.getElementById('plannerCount').textContent=faNum(state.tasks.length)+' مورد';
+  if(!state.tasks.length){el.innerHTML='<div class="emptyTasks"><b>لیست خالی است</b>برای شروع، کار جدید اضافه کن.</div>';return}
+  const list=[...state.tasks].sort((a,b)=>{
+    const da=(a.date||a.createdAt||''); const db=(b.date||b.createdAt||'');
+    if(da!==db) return da<db?-1:1;
+    return (a.time||'').localeCompare(b.time||'');
+  });
+  el.innerHTML=list.map(t=>{
+    const dmeta=`<span class="category">📅 ${jalaliShortFromISO(t.date||t.createdAt||todayKey())}</span>`;
+    return taskRowHTML(t,dmeta);
+  }).join('');
+  bindTaskRowEvents(el);
+}
+
+/* ==== Calendar Page ==== */
+let cal={jy:null,jm:null,selectedISO:null};
+function ensureCalInit(){
+  if(cal.selectedISO) return;
+  cal.selectedISO=todayKey();
+  const j=gToJISO(cal.selectedISO);
+  cal.jy=j.jy;cal.jm=j.jm;
+}
+function renderCalendar(){
+  const grid=document.getElementById('calGrid'); if(!grid) return;
+  document.getElementById('calTitle').textContent=`${J_MONTHS[cal.jm-1]} ${faNum(cal.jy)}`;
+  const monthLen=jalaaliMonthLength(cal.jy,cal.jm);
+  const firstISO=jToGISO(cal.jy,cal.jm,1);
+  const [gy,gm,gd]=firstISO.split('-').map(Number);
+  const firstDay=new Date(gy,gm-1,gd);
+  const offset=(firstDay.getDay()+1)%7;
+  const today=todayKey();
+  const cells=[];
+  for(let i=0;i<offset;i++) cells.push(`<button class="calDay empty" disabled></button>`);
+  for(let d=1;d<=monthLen;d++){
+    const iso=jToGISO(cal.jy,cal.jm,d);
+    const tasks=tasksForDate(iso);
+    const has=tasks.length>0;
+    const allDone=has&&tasks.every(t=>t.done);
+    const dots=has?`<div class="calDayDots">${Array(Math.min(3,tasks.length)).fill(0).map(()=>`<span class="calDayDot"></span>`).join('')}</div>`:`<div class="calDayDots"></div>`;
+    const holidays={'1-1':'نوروز','1-13':'سیزده‌بدر','9-30':'یلدا'};
+    const hLabel=holidays[`${cal.jm}-${d}`]||'';
+    const h=hLabel?`<div class="calDayHoliday">${hLabel}</div>`:`<div class="calDayHoliday"></div>`;
+    const col=(offset+(d-1))%7;
+    const isFri=col===6;
+    cells.push(`
+      <button class="calDay ${isFri?'friday':''} ${iso===today?'today':''} ${iso===cal.selectedISO?'selected':''} ${allDone?'allDone':''}" data-iso="${iso}">
+        <div class="calDayNum">${faNum(d)}</div>${dots}${h}
+      </button>`);
+  }
+  grid.innerHTML=cells.join('');
+  grid.querySelectorAll('[data-iso]').forEach(b=>b.onclick=()=>{
+    cal.selectedISO=b.dataset.iso;
+    const j=gToJISO(cal.selectedISO);
+    cal.jy=j.jy;cal.jm=j.jm;
+    renderCalendar();renderDayList();
+  });
+}
+function renderDayList(){
+  const iso=cal.selectedISO||todayKey();
+  const j=gToJISO(iso);
+  document.getElementById('dayTitle').textContent=`کارهای ${faNum(j.jd)} ${J_MONTHS[j.jm-1]} ${faNum(j.jy)}`;
+  const list=tasksForDate(iso).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  document.getElementById('dayCount').textContent=faNum(list.length)+' مورد';
+  const el=document.getElementById('dayList');
+  if(!list.length){el.innerHTML='<div class="emptyTasks"><b>برای این روز کاری ثبت نشده</b>با «＋ کار جدید» برنامه‌ریزی کن.</div>';return}
+  el.innerHTML=list.map(t=>taskRowHTML(t)).join('');
+  bindTaskRowEvents(el);
+}
+document.getElementById('calPrev').onclick=()=>{
+  ensureCalInit();cal.jm--;
+  if(cal.jm<1){cal.jm=12;cal.jy--;}
+  cal.selectedISO=jToGISO(cal.jy,cal.jm,1);
+  renderCalendar();renderDayList();
+};
+document.getElementById('calNext').onclick=()=>{
+  ensureCalInit();cal.jm++;
+  if(cal.jm>12){cal.jm=1;cal.jy++;}
+  cal.selectedISO=jToGISO(cal.jy,cal.jm,1);
+  renderCalendar();renderDayList();
+};
+document.getElementById('calToday').onclick=()=>{
+  const iso=todayKey();
+  const j=gToJISO(iso);
+  cal.selectedISO=iso;cal.jy=j.jy;cal.jm=j.jm;
+  renderCalendar();renderDayList();
+};
+
+/* ==== Jalali Date Picker (for Task Form) ==== */
+let jdp={jy:null,jm:null,selectedISO:null,target:null};
+function openJDP(currentISO,onPick){
+  const iso=currentISO||todayKey();
+  const j=gToJISO(iso);
+  jdp.jy=j.jy;jdp.jm=j.jm;jdp.selectedISO=iso;jdp.target=onPick;
+  renderJDP();
+  document.getElementById('jdpModal').classList.add('show');
+}
+function renderJDP(){
+  const grid=document.getElementById('jdpGrid');
+  document.getElementById('jdpTitle').textContent=`${J_MONTHS[jdp.jm-1]} ${faNum(jdp.jy)}`;
+  const monthLen=jalaaliMonthLength(jdp.jy,jdp.jm);
+  const firstISO=jToGISO(jdp.jy,jdp.jm,1);
+  const [gy,gm,gd]=firstISO.split('-').map(Number);
+  const firstDay=new Date(gy,gm-1,gd);
+  const offset=(firstDay.getDay()+1)%7;
+  const today=todayKey();
+  const cells=[];
+  for(let i=0;i<offset;i++) cells.push(`<button class="calDay empty" disabled></button>`);
+  for(let d=1;d<=monthLen;d++){
+    const iso=jToGISO(jdp.jy,jdp.jm,d);
+    const col=(offset+(d-1))%7;
+    const isFri=col===6;
+    cells.push(`
+      <button class="calDay ${isFri?'friday':''} ${iso===today?'today':''} ${iso===jdp.selectedISO?'selected':''}" data-jdp-iso="${iso}">
+        <div class="calDayNum">${faNum(d)}</div>
+        <div class="calDayDots"></div>
+        <div class="calDayHoliday"></div>
+      </button>`);
+  }
+  grid.innerHTML=cells.join('');
+  grid.querySelectorAll('[data-jdp-iso]').forEach(b=>b.onclick=()=>{
+    jdp.selectedISO=b.dataset.jdpIso;
+    if(jdp.target) jdp.target(jdp.selectedISO);
+    document.getElementById('jdpModal').classList.remove('show');
+  });
+}
+document.getElementById('jdpPrev').onclick=()=>{jdp.jm--;if(jdp.jm<1){jdp.jm=12;jdp.jy--;}renderJDP();};
+document.getElementById('jdpNext').onclick=()=>{jdp.jm++;if(jdp.jm>12){jdp.jm=1;jdp.jy++;}renderJDP();};
+document.getElementById('jdpTodayBtn').onclick=()=>{
+  const iso=todayKey();
+  jdp.selectedISO=iso;
+  if(jdp.target) jdp.target(iso);
+  document.getElementById('jdpModal').classList.remove('show');
+};
+document.getElementById('jdpClose').onclick=()=>document.getElementById('jdpModal').classList.remove('show');
+document.getElementById('taskDateBtn').onclick=()=>{
+  const current=document.getElementById('taskDate').value||todayKey();
+  openJDP(current,iso=>{
+    document.getElementById('taskDate').value=iso;
+    document.getElementById('taskDateDisplay').textContent=jalaliDisplayFromISO(iso);
+  });
+};
+
+/* ==== Habits ==== */
+function isHabitDoneToday(h){return!!(h.log&&h.log[todayKey()])}
+function calcStreak(h){
+  let streak=0;const d=new Date();
+  for(let i=0;i<365;i++){
+    const k=d.toISOString().split('T')[0];
+    if(h.log&&h.log[k])streak++;else break;
+    d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+function toggleHabit(id){
+  const h=state.habits.find(x=>x.id===id); if(!h) return;
+  h.log=h.log||{};const k=todayKey();
+  if(h.log[k]) delete h.log[k]; else h.log[k]=true;
+  h.streak=calcStreak(h);save();
+  renderHomeHabits();renderHabits();renderStats();
+}
+function renderHomeHabits(){
+  const el=document.getElementById('homeHabits');
+  const list=state.habits.slice(0,4);
+  if(!list.length){el.innerHTML='<div class="emptyTasks"><b>عادتی نداری</b>در صفحه عادت‌ها اضافه کن.</div>';return}
+  el.innerHTML=list.map(h=>`
+    <div class="habit">
+      <div class="habitInfo"><div class="habitIcon">${h.icon}</div>
+        <div><b>${esc(h.name)}</b><small>${h.goal?esc(h.goal)+' · ':''}${faNum(h.streak||0)} روز 🔥</small></div>
+      </div>
+      <div class="habitActions"><button class="habitCheck ${isHabitDoneToday(h)?'done':''}" data-hcheck="${h.id}">${isHabitDoneToday(h)?'✓':''}</button></div>
+    </div>`).join('');
+  el.querySelectorAll('[data-hcheck]').forEach(b=>b.onclick=()=>toggleHabit(b.dataset.hcheck));
+}
+function renderHabits(){
+  const el=document.getElementById('habitsList');
+  document.getElementById('habitsCount').textContent=faNum(state.habits.length)+' عادت';
+  if(!state.habits.length){el.innerHTML='<div class="emptyTasks"><b>عادتی نداری</b>اولین عادتت را بساز.</div>';return}
+  el.innerHTML=state.habits.map(h=>`
+    <div class="habit">
+      <div class="habitInfo"><div class="habitIcon">${h.icon}</div>
+        <div><b>${esc(h.name)}</b><small>${h.goal?esc(h.goal)+' · ':''}${faNum(h.streak||0)} روز 🔥</small></div>
+      </div>
+      <div class="habitActions">
+        <button class="taskAction" data-hedit="${h.id}">✎</button>
+        <button class="taskAction" data-hdel="${h.id}">×</button>
+        <button class="habitCheck ${isHabitDoneToday(h)?'done':''}" data-hcheck="${h.id}">${isHabitDoneToday(h)?'✓':''}</button>
+      </div>
+    </div>`).join('');
+  el.querySelectorAll('[data-hcheck]').forEach(b=>b.onclick=()=>toggleHabit(b.dataset.hcheck));
+  el.querySelectorAll('[data-hedit]').forEach(b=>b.onclick=()=>openHabit(b.dataset.hedit));
+  el.querySelectorAll('[data-hdel]').forEach(b=>b.onclick=()=>delHabit(b.dataset.hdel));
+}
+function openHabit(id=null){
+  editHabitId=id;
+  const h=id?state.habits.find(x=>x.id===id):null;
+  document.getElementById('habitModalTitle').textContent=id?'ویرایش عادت':'عادت جدید';
+  document.getElementById('habitName').value=h?.name||'';
+  document.getElementById('habitIcon').value=h?.icon||'📌';
+  document.getElementById('habitGoal').value=h?.goal||'';
+  document.getElementById('habitModal').classList.add('show');
+}
+function delHabit(id){
+  const h=state.habits.find(x=>x.id===id); if(!h) return;
+  if(!confirm(`عادت «${h.name}» حذف شود؟`)) return;
+  state.habits=state.habits.filter(x=>x.id!==id);save();
+  renderHabits();renderHomeHabits();
+  toast('عادت حذف شد.','success');
+}
+document.getElementById('newHabit').onclick=()=>openHabit();
+document.getElementById('closeHabitModal').onclick=()=>{editHabitId=null;document.getElementById('habitModal').classList.remove('show')};
+document.getElementById('saveHabit').onclick=()=>{
+  const name=document.getElementById('habitName').value.trim();
+  if(!name) return toast('نام عادت را وارد کن.','error');
+  const data={name,icon:document.getElementById('habitIcon').value.trim()||'📌',goal:document.getElementById('habitGoal').value.trim()};
+  if(editHabitId){
+    const h=state.habits.find(x=>x.id===editHabitId);
+    if(h) Object.assign(h,data);
+    toast('عادت بروزرسانی شد.','success');
+  }else{
+    state.habits.push({id:'h_'+Date.now().toString(36),...data,log:{},streak:0});
+    toast('عادت اضافه شد.','success');
+  }
+  save();renderHabits();renderHomeHabits();
+  editHabitId=null;
+  document.getElementById('habitModal').classList.remove('show');
+};
+
+/* ==== Stats ==== */
+function weekDays(){
+  const days=[];const d=new Date();
+  for(let i=6;i>=0;i--){const x=new Date(d);x.setDate(d.getDate()-i);days.push(x.toISOString().split('T')[0])}
+  return days;
+}
+function renderWeekChart(){
+  const el=document.getElementById('weekChart');
+  const el2=document.getElementById('statsChart');
+  const days=weekDays();
+  const data=days.map(k=>{
+    const done=state.tasks.filter(t=>t.done&&(t.date||t.createdAt)===k).length;
+    const focus=state.focusSessions[k]||0;
+    return{done,focus,score:Math.min(100,done*20+focus*2)};
+  });
+  const max=Math.max(...data.map(d=>d.score),20);
+  const html=data.map(d=>`<div class="bar" style="height:${Math.max(8,d.score/max*100)}%" title="${d.done} کار، ${d.focus} دقیقه"></div>`).join('');
+  if(el) el.innerHTML=html;
+  if(el2) el2.innerHTML=html;
+  const totalFocus=data.reduce((s,d)=>s+d.focus,0);
+  const totalTasks=state.tasks.length;
+  const donePct=totalTasks?Math.round(state.tasks.filter(t=>t.done).length/totalTasks*100):0;
+  document.getElementById('weekCompletion').textContent=faNum(donePct)+'٪';
+  document.getElementById('weekFocus').textContent=faNum(totalFocus)+' دقیقه';
+  const totalDone=data.reduce((s,d)=>s+d.done,0);
+  const sc=document.getElementById('statsCount');if(sc)sc.textContent=faNum(totalDone);
+  const sf=document.getElementById('statsFocus');if(sf)sf.textContent=faNum(totalFocus)+' دقیقه';
+  const st=document.getElementById('statsWeekTotal');if(st)st.textContent=faNum(totalDone)+' کار · '+faNum(totalFocus)+' دقیقه تمرکز';
+}
+function renderStats(){
+  renderWeekChart();
+  const el=document.getElementById('statsHabits');
+  if(!el) return;
+  if(!state.habits.length){el.innerHTML='<div class="emptyTasks"><b>عادتی نداری</b></div>';return}
+  const days=weekDays();
+  el.innerHTML=state.habits.map(h=>{
+    const done=days.filter(d=>h.log&&h.log[d]).length;
+    const pct=Math.round(done/7*100);
+    return `<div class="habit">
+      <div class="habitInfo"><div class="habitIcon">${h.icon}</div>
+      <div><b>${esc(h.name)}</b><small>${faNum(done)} از ۷ روز · ${faNum(pct)}٪</small></div></div>
+      <div class="habitStreak">${faNum(h.streak||0)} روز</div>
+    </div>`;
+  }).join('');
+}
+
+/* ==== Pomodoro ==== */
+let tState={mode:'focus',remain:0,interval:null,done:0};
+function tSecs(){return (tState.mode==='focus'?state.timer.focus:tState.mode==='short'?state.timer.short:state.timer.long)*60}
+function tFmt(v){const m=Math.floor(v/60),s=v%60;return faNum(String(m).padStart(2,'0')+':'+String(s).padStart(2,'0'))}
+function tPaint(){
+  const txt=tFmt(tState.remain);
+  document.getElementById('timer').textContent=txt;
+  document.getElementById('timerBig').textContent=txt;
+  const total=tSecs();
+  const pct=total?((total-tState.remain)/total*100).toFixed(1):0;
+  document.getElementById('timerRing').style.setProperty('--tprog',pct+'%');
+  document.getElementById('timerRingBig').style.setProperty('--tprog',pct+'%');
+  const labels={focus:'جلسه تمرکز',short:'استراحت کوتاه',long:'استراحت بلند'};
+  const pill=document.getElementById('focusMode');const pillBig=document.getElementById('focusModeBig');
+  pill.textContent=labels[tState.mode];pillBig.textContent=labels[tState.mode];
+  pill.classList.toggle('break',tState.mode!=='focus');pillBig.classList.toggle('break',tState.mode!=='focus');
+  const note=`جلسات امروز: ${faNum(tState.done)} / ${faNum(state.timer.cycles)}`;
+  document.getElementById('focusNote').textContent=note;
+  document.getElementById('focusNoteBig').textContent=note;
+}
+function tReset(){
+  clearInterval(tState.interval);tState.interval=null;
+  tState.mode='focus';tState.remain=state.timer.focus*60;
+  document.querySelectorAll('#startTimer,#bigStart').forEach(b=>b.textContent='شروع');
+  tPaint();
+}
+function tStart(){
+  if(tState.interval){
+    clearInterval(tState.interval);tState.interval=null;
+    document.querySelectorAll('#startTimer,#bigStart').forEach(b=>b.textContent='ادامه');
+    return;
+  }
+  if(tState.remain<=0) tState.remain=tSecs();
+  document.querySelectorAll('#startTimer,#bigStart').forEach(b=>b.textContent='توقف');
+  tState.interval=setInterval(()=>{
+    tState.remain--;tPaint();
+    if(tState.remain<=0){
+      clearInterval(tState.interval);tState.interval=null;
+      if(tState.mode==='focus'){
+        tState.done++;
+        const k=todayKey();
+        state.focusSessions[k]=(state.focusSessions[k]||0)+state.timer.focus;
+        save();renderWeekChart();
+        toast('جلسه تمرکز تمام شد! 🎉','success');
+        tState.mode=(tState.done%state.timer.cycles===0)?'long':'short';
+      }else{
+        toast('استراحت تمام شد. آماده جلسه بعدی؟','');
+        tState.mode='focus';
+      }
+      tState.remain=tSecs();
+      document.querySelectorAll('#startTimer,#bigStart').forEach(b=>b.textContent='شروع');
+      tPaint();
+    }
+  },1000);
+}
+function tSkip(){
+  clearInterval(tState.interval);tState.interval=null;
+  tState.mode=tState.mode==='focus'?'short':'focus';
+  tState.remain=tSecs();
+  document.querySelectorAll('#startTimer,#bigStart').forEach(b=>b.textContent='شروع');
+  tPaint();
+}
+document.getElementById('startTimer').onclick=tStart;
+document.getElementById('bigStart').onclick=tStart;
+document.getElementById('resetTimer').onclick=tReset;
+document.getElementById('bigReset').onclick=tReset;
+document.getElementById('bigSkip').onclick=tSkip;
+
+function openTimerSettings(){
+  document.getElementById('focusMin').value=state.timer.focus;
+  document.getElementById('breakMin').value=state.timer.short;
+  document.getElementById('longBreakMin').value=state.timer.long;
+  document.getElementById('cycles').value=state.timer.cycles;
+  document.getElementById('timerModal').classList.add('show');
+}
+document.getElementById('focusSettings').onclick=openTimerSettings;
+document.getElementById('openTimerSettings').onclick=openTimerSettings;
+document.getElementById('closeTimerModal').onclick=()=>document.getElementById('timerModal').classList.remove('show');
+document.getElementById('saveTimer').onclick=()=>{
+  state.timer={
+    focus:Math.max(1,+document.getElementById('focusMin').value||25),
+    short:Math.max(1,+document.getElementById('breakMin').value||5),
+    long:Math.max(1,+document.getElementById('longBreakMin').value||15),
+    cycles:Math.max(2,+document.getElementById('cycles').value||4)
+  };
+  save();tReset();
+  document.getElementById('timerModal').classList.remove('show');
+  toast('تنظیمات تایمر ذخیره شد.','success');
+};
+
+/* ==== Profile ==== */
+function renderProfile(){
+  document.getElementById('profileDisplayName').textContent=state.user.name||'کاربر زمانتو';
+  document.getElementById('profileGoal').textContent='شماره: '+(state.user.phone?faNum(state.user.phone):'—');
+  document.getElementById('profileNameInput').value=state.user.name||'';
+  document.getElementById('profileEmailInput').value=state.user.email||'';
+  document.getElementById('profileGoalInput').value=state.user.goal||'';
+  document.getElementById('profileRoleInput').value=state.user.role||'ترکیبی';
+  document.getElementById('profileNotifyBtn').textContent=state.notifications?'فعال':'غیرفعال';
+}
+document.getElementById('saveProfile').onclick=()=>{
+  state.user.name=document.getElementById('profileNameInput').value.trim();
+  state.user.email=document.getElementById('profileEmailInput').value.trim();
+  state.user.goal=document.getElementById('profileGoalInput').value.trim();
+  state.user.role=document.getElementById('profileRoleInput').value;
+  save();syncProfile();renderProfile();renderTop();
+  toast('پروفایل ذخیره شد.','success');
+  checkDiscountEarned();
+};
+document.getElementById('profileThemeBtn').onclick=()=>{state.theme=state.theme==='dark'?'light':'dark';applyTheme();save()};
+document.getElementById('profileNotifyBtn').onclick=()=>{state.notifications=!state.notifications;save();renderProfile();toast(state.notifications?'یادآوری‌ها فعال شد.':'یادآوری‌ها غیرفعال شد.','')};
+document.getElementById('clearDataBtn').onclick=async()=>{
+  if(!confirm('همه اطلاعات زمانتو پاک شود؟'))return;
+  try{
+    if(getToken()) await apiFetch('/api/state',{method:'DELETE'});
+  }catch(err){toast('پاک‌سازی روی سرور انجام نشد.','error');return}
+  localStorage.removeItem(KEY);
+  state=structuredClone(DEFAULT);
+  renderAll();
+  toast('داده‌ها پاک شد.','success');
+};
+document.getElementById('logoutBtn').onclick=async()=>{
+  if(!confirm('از حساب خارج می‌شوی؟'))return;
+  try{if(getToken())await apiFetch('/api/auth/logout',{method:'POST'})}catch{}
+  clearAuth();localStorage.removeItem(KEY);location.reload();
+};
+
+/* ==== Auth (OTP) ==== */
+const phoneInput=document.getElementById('phoneInput');
+const otpBoxes=document.querySelectorAll('.otpDigit');
+phoneInput.addEventListener('input',e=>{
+  e.target.value=e.target.value.replace(/[^\d]/g,'').slice(0,11);
+  document.getElementById('phoneStatus').textContent='';
+});
+phoneInput.addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('sendCodeBtn').click()});
+function generateOTP(){return String(Math.floor(1000+Math.random()*9000))}
+document.getElementById('sendCodeBtn').onclick=async()=>{
+  const phone=phoneInput.value.trim();
+  if(!validIranPhone(phone)){
+    document.getElementById('phoneStatus').textContent='شماره موبایل باید ۱۱ رقمی و با 09 شروع شود.';
+    return;
+  }
+  const btn=document.getElementById('sendCodeBtn');btn.disabled=true;
+  try{
+    const result=await apiFetch('/api/auth/request-otp',{method:'POST',body:JSON.stringify({phone})});
+    pendingPhone=phone;
+    document.getElementById('phoneStep').style.display='none';
+    document.getElementById('otpStep').style.display='block';
+    document.getElementById('otpPhoneDisplay').textContent=phone;
+    otpBoxes.forEach(b=>{b.value='';b.classList.remove('filled')});
+    setTimeout(()=>otpBoxes[0].focus(),120);
+    startResendTimer();
+    if(result?.devCode)toast(`🔐 کد توسعه: ${result.devCode}`,'success');
+  }catch(err){
+    document.getElementById('phoneStatus').textContent=err.message||'ارسال کد انجام نشد.';
+  }finally{btn.disabled=false}
+}
+function startResendTimer(){
+  const btn=document.getElementById('resendBtn');
+  let sec=60;btn.disabled=true;
+  const tspan=document.getElementById('resendTimer');
+  tspan.textContent=faNum(sec);
+  clearInterval(resendInterval);
+  resendInterval=setInterval(()=>{
+    sec--;const s=document.getElementById('resendTimer');
+    if(s) s.textContent=faNum(sec);
+    if(sec<=0){clearInterval(resendInterval);btn.disabled=false;btn.textContent='ارسال مجدد کد';}
+  },1000);
+}
+document.getElementById('resendBtn').onclick=async()=>{
+  const btn=document.getElementById('resendBtn');
+  if(btn.disabled||!pendingPhone)return;
+  try{
+    const result=await apiFetch('/api/auth/request-otp',{method:'POST',body:JSON.stringify({phone:pendingPhone})});
+    otpBoxes.forEach(b=>{b.value='';b.classList.remove('filled')});
+    otpBoxes[0].focus();
+    btn.innerHTML='ارسال مجدد کد (<span id="resendTimer">60</span>)';
+    startResendTimer();
+    if(result?.devCode)toast(`🔐 کد توسعه جدید: ${result.devCode}`,'success');
+  }catch(err){document.getElementById('otpStatus').textContent=err.message||'ارسال مجدد انجام نشد.'}
+};
+document.getElementById('changePhoneBtn').onclick=()=>{
+  clearInterval(resendInterval);
+  document.getElementById('otpStep').style.display='none';
+  document.getElementById('phoneStep').style.display='block';
+  document.getElementById('otpStatus').textContent='';
+  pendingOTP=null;pendingPhone=null;
+  setTimeout(()=>phoneInput.focus(),120);
+};
+otpBoxes.forEach((box,i)=>{
+  box.addEventListener('input',e=>{
+    const v=e.target.value.replace(/[^\d]/g,'');
+    e.target.value=v;
+    if(v){e.target.classList.add('filled');if(i<3)otpBoxes[i+1].focus()}
+    else e.target.classList.remove('filled');
+    document.getElementById('otpStatus').textContent='';
+    const all=[...otpBoxes].map(b=>b.value).join('');
+    if(all.length===4) setTimeout(()=>document.getElementById('verifyCodeBtn').click(),150);
+  });
+  box.addEventListener('keydown',e=>{
+    if(e.key==='Backspace'&&!e.target.value&&i>0) otpBoxes[i-1].focus();
+  });
+  box.addEventListener('paste',e=>{
+    e.preventDefault();
+    const digits=(e.clipboardData||window.clipboardData).getData('text').replace(/[^\d]/g,'').slice(0,4);
+    digits.split('').forEach((d,idx)=>{if(otpBoxes[idx]){otpBoxes[idx].value=d;otpBoxes[idx].classList.add('filled')}});
+    if(digits.length===4) setTimeout(()=>document.getElementById('verifyCodeBtn').click(),150);
+  });
+});
+document.getElementById('verifyCodeBtn').onclick=async()=>{
+  const code=[...otpBoxes].map(b=>b.value).join('');
+  if(code.length!==4){document.getElementById('otpStatus').textContent='کد ۴ رقمی را کامل وارد کن.';return}
+  const btn=document.getElementById('verifyCodeBtn');btn.disabled=true;
+  try{
+    const result=await apiFetch('/api/auth/verify-otp',{method:'POST',body:JSON.stringify({phone:pendingPhone,code})});
+    clearInterval(resendInterval);
+    setAuth({loggedIn:true,token:result.token,phone:result.user?.phone||pendingPhone,at:Date.now()});
+    state={...state,user:{...state.user,...result.user}};
+    localStorage.setItem(KEY,JSON.stringify(state));
+    document.getElementById('authGate').classList.remove('show');
+    const ok=await hydrateFromServer();
+    if(ok){toast('خوش اومدی به زمانتو 🎉','success');init()}
+    else{
+      document.getElementById('authGate').classList.add('show');
+      clearAuth();
+    }
+  }catch(err){
+    document.getElementById('otpStatus').textContent=err.message||'کد تأیید نامعتبر است.';
+    otpBoxes.forEach(b=>{b.value='';b.classList.remove('filled')});
+    otpBoxes[0].focus();
+  }finally{btn.disabled=false}
+}
+
+/* ==== Boot ==== */
+function renderAll(){
+  applyTheme();renderTop();renderBanners();
+  renderHomeTasks();renderPlanner();
+  renderHomeHabits();renderWeekChart();renderProfile();
+  ensureCalInit();tReset();
+}
+function init(){renderAll();showPage('home');}
+async function boot(){
+  const auth=getAuth();
+  if(!auth?.loggedIn||!auth?.token){
+    clearAuth();
+    document.getElementById('authGate').classList.add('show');
+    setTimeout(()=>phoneInput.focus(),200);
+    return;
+  }
+  const ok=await hydrateFromServer();
+  if(!ok){
+    document.getElementById('authGate').classList.add('show');
+    setTimeout(()=>phoneInput.focus(),200);
+    return;
+  }
+  init();
+}
+boot();
+</script>
+
+</body>
+</html>
+<div class="toast" id="toast"></div>
