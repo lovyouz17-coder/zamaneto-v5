@@ -117,13 +117,13 @@ app.post('/api/auth/request-otp', async (req, res, next) => {
       [phone, codeHash, OTP_EXPIRES_MS]
     );
 
-    let devCode;
-    const isDev = process.env.NODE_ENV !== 'production' || process.env.OTP_MODE === 'console';
-    if (isDev) {
-      devCode = code;
+    const isDev = process.env.NODE_ENV !== 'production';
+    if (isDev && process.env.OTP_MODE === 'console') {
       console.log(`[ZAMANETO OTP] ${phone} -> ${code}`);
     }
-    res.json({ ok: true, expiresIn: Math.floor(OTP_EXPIRES_MS / 1000), devCode });
+    const payload = { ok: true, expiresIn: Math.floor(OTP_EXPIRES_MS / 1000) };
+    if (isDev && process.env.OTP_MODE === 'console') payload.devCode = code;
+    res.json(payload);
   } catch (e) { next(e); }
 });
 
