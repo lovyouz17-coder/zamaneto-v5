@@ -20,8 +20,10 @@ CREATE TABLE IF NOT EXISTS otp_codes (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   expires_at TIMESTAMPTZ NOT NULL,
   used BOOLEAN NOT NULL DEFAULT FALSE,
-  used_at TIMESTAMPTZ
+  used_at TIMESTAMPTZ,
+  attempts INTEGER NOT NULL DEFAULT 0
 );
+ALTER TABLE otp_codes ADD COLUMN IF NOT EXISTS attempts INTEGER NOT NULL DEFAULT 0;
 CREATE INDEX IF NOT EXISTS idx_otp_phone_created ON otp_codes(phone, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_otp_expires ON otp_codes(expires_at);
 
