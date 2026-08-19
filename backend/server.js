@@ -182,15 +182,15 @@ app.get('/api/me', auth, async (req, res) => {
 
 app.put('/api/me', auth, async (req, res, next) => {
   try {
-    const allowed = ['name', 'email', 'goal', 'role'];
+    const allowed = ['name', 'email', 'goal'];
     const values = {};
     for (const key of allowed) if (key in req.body) values[key] = String(req.body[key] ?? '').trim();
     const user = await query(
       `UPDATE users SET
          name = COALESCE($1, name), email = COALESCE($2, email),
-         goal = COALESCE($3, goal), role = COALESCE($4, role), updated_at = NOW()
-       WHERE id = $5 RETURNING *`,
-      [values.name ?? null, values.email ?? null, values.goal ?? null, values.role ?? null, req.user.id]
+         goal = COALESCE($3, goal), updated_at = NOW()
+       WHERE id = $4 RETURNING *`,
+      [values.name ?? null, values.email ?? null, values.goal ?? null, req.user.id]
     );
     res.json({ user: publicUser(user.rows[0]) });
   } catch (e) { next(e); }
