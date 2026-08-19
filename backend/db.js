@@ -1,3 +1,6 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import dotenv from 'dotenv';
 
@@ -40,6 +43,16 @@ export async function withTransaction(fn) {
     client.release();
   }
 }
+
+async function applySchema() {
+  const currentDir = path.dirname(fileURLToPath(import.meta.url));
+  const schemaPath = path.resolve(currentDir, '..', 'database', 'schema.sql');
+  const schema = await fs.readFile(schemaPath, 'utf8');
+  await pool.query(schema);
+  console.log('[ZAMANETO DB] schema synchronized.');
+}
+
+await applySchema();
 
 export async function closeDb() {
   await pool.end();
