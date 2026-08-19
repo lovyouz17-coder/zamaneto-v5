@@ -13,6 +13,7 @@ const __dirname = path.dirname(__filename);
 const root = path.resolve(__dirname, '..');
 const app = express();
 const PORT = Number(process.env.PORT || 3000);
+const HOST = '0.0.0.0';
 const OTP_EXPIRES_MS = Number(process.env.OTP_EXPIRES_MINUTES || 5) * 60 * 1000;
 const SESSION_EXPIRES_MS = Number(process.env.SESSION_EXPIRES_DAYS || 30) * 24 * 60 * 60 * 1000;
 const OTP_MAX_ATTEMPTS = 5;
@@ -304,8 +305,8 @@ app.use((err, _req, res, _next) => {
 
 app.get(/.*/, (_req, res) => res.sendFile(path.join(root, 'frontend', 'index.html')));
 
-const server = app.listen(PORT, () => {
-  console.log(`زمانتو روی http://localhost:${PORT} اجرا شد.`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`زمانتو روی http://${HOST}:${PORT} اجرا شد.`);
 });
 
 async function shutdown(signal) {
