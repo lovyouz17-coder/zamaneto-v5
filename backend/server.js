@@ -16,6 +16,9 @@ const PORT = Number(process.env.PORT || 3000);
 const OTP_EXPIRES_MS = Number(process.env.OTP_EXPIRES_MINUTES || 5) * 60 * 1000;
 const SESSION_EXPIRES_MS = Number(process.env.SESSION_EXPIRES_DAYS || 30) * 24 * 60 * 60 * 1000;
 const OTP_MAX_ATTEMPTS = 5;
+const OTP_IP_WINDOW_MS = 10 * 60 * 1000;
+const OTP_IP_MAX_REQUESTS = 5;
+const otpIpRequests = new Map();
 
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -29,6 +32,26 @@ function isIranPhone(phone) { return /^09\d{9}$/.test(phone); }
 function generateOtp() { return String(crypto.randomInt(1000, 10000)); }
 function createToken() { return crypto.randomBytes(32).toString('hex'); }
 function sha256(value) { return crypto.createHash('sha256').update(value).digest('hex'); }
+
+function consumeOtpIpLimit(ip) {
+  const now = Date.now();
+  const current = otpIpRequests.get(ip) || { startedAt: now, count: 0 };
+  if (now - current.startedAt >= OTP_IP_WINDOW_MS) {
+    otpIpRequests.set(ip, { startedAt: now, count: 1 });
+    return true;
+  }
+  if (current.count >= OTP_IP_MAX_REQUESTS) return false;
+  current.count += 1;
+  otpIpRequests.set(ip, current);
+  return true;
+}
+
+setInterval(() => {
+  const cutoff = Date.now() - OTP_IP_WINDOW_MS;
+  for (const [ip, entry] of otpIpRequests) {
+    if (entry.startedAt < cutoff) otpIpRequests.delete(ip);
+  }
+}, OTP_IP_WINDOW_MS).unref();
 
 function defaultUserData() {
   return {
@@ -105,6 +128,10 @@ app.post('/api/auth/request-otp', async (req, res, next) => {
   try {
     const phone = normalizePhone(req.body?.phone);
     if (!isIranPhone(phone)) return res.status(400).json({ error: 'شماره موبایل باید ۱۱ رقمی و با 09 شروع شود.' });
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    if (!consumeOtpIpLimit(ip)) {
+      return res.status(429).json({ error: 'تعداد درخواست‌های کد تأیید از این اتصال بیش از حد مجاز است. کمی بعد دوباره تلاش کنید.' });
+    }
     await cleanup();
     const recent = await query(
       `SELECT 1 FROM otp_codes WHERE phone = $1 AND created_at > NOW() - INTERVAL '60 seconds' LIMIT 1`,
