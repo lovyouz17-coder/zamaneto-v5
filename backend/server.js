@@ -20,6 +20,42 @@ const OTP_MAX_ATTEMPTS = 5;
 const OTP_IP_WINDOW_MS = 10 * 60 * 1000;
 const OTP_IP_MAX_REQUESTS = 5;
 
+
+async function sendFarazOtpSms(phone, code) {
+  const apiKey = process.env.FARAZSMS_API_KEY;
+  const patternCode = process.env.FARAZSMS_PATTERN_CODE;
+  const lineNumber = process.env.FARAZSMS_LINE_NUMBER;
+
+  if (!apiKey || !patternCode || !lineNumber) {
+    throw new Error('تنظیمات FarazSMS کامل نیست.');
+  }
+
+  const response = await fetch('https://api.iranpayamak.com/ws/v1/sms/pattern', {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      'Api-Key': apiKey,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      code: patternCode,
+      attributes: {
+        code
+      },
+      recipient: phone,
+      line_number: lineNumber,
+      number_format: 'english'
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(`FarazSMS error: ${JSON.stringify(data)}`);
+  }
+
+  return data;
+}
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(root, 'frontend')));
