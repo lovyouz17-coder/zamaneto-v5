@@ -290,8 +290,17 @@ app.post('/api/auth/verify-otp', async (req, res, next) => {
   }
 });
 
-app.get('/api/me', auth, async (req, res) => {
-  res.json({ user: publicUser(req.user) });
+app.get('/api/me', auth, async (req, res, next) => {
+  try {
+    const subscription = await getActiveSubscription(req.user.id);
+
+    res.json({
+      user: publicUser(req.user),
+      subscription
+    });
+  } catch (e) {
+    next(e);
+  }
 });
 
 app.put('/api/me', auth, async (req, res, next) => {
