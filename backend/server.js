@@ -179,6 +179,21 @@ function publicUser(row) {
   };
 }
 
+async function getActiveSubscription(userId) {
+  const result = await query(
+    `SELECT plan, status, started_at, expires_at
+     FROM subscriptions
+     WHERE user_id = $1
+       AND status = 'active'
+       AND expires_at > NOW()
+     ORDER BY expires_at DESC
+     LIMIT 1`,
+    [userId]
+  );
+
+  return result.rows[0] || null;
+}
+
 app.get('/api/health', async (_req, res, next) => {
   try {
     const { rows } = await query('SELECT NOW() AS now');
