@@ -171,6 +171,9 @@ app.post('/api/auth/request-otp', async (req, res, next) => {
       [phone, codeHash, OTP_EXPIRES_MS]
     );
 
+    await sendFarazOtpSms(phone, code);
+
+    
     const isDev = process.env.NODE_ENV !== 'production';
     if (isDev && process.env.OTP_MODE === 'console') {
       console.log(`[ZAMANETO OTP] ${phone} -> ${code}`);
