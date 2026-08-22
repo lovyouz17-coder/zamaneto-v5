@@ -270,6 +270,12 @@ app.post('/api/auth/verify-otp', async (req, res, next) => {
            RETURNING *`, [phone, JSON.stringify(defaultUserData())]
         );
         user = userResult.rows[0];
+
+               await client.query(
+          `INSERT INTO subscriptions (user_id, plan, status, expires_at)
+           VALUES ($1, 'trial', 'active', NOW() + INTERVAL '7 days')`,
+          [user.id]
+        );
       }
 
       const rawToken = createToken();
